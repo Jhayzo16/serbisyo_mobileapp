@@ -17,7 +17,7 @@ class HomeWidgetSearch extends StatelessWidget {
             color: Color(0xFFADACAD),
           ),
           hintText: 'Search services.....',
-          hintStyle: const TextStyle(
+          hintStyle: TextStyle(
             color: Color(0xFFCACACA),
             fontSize: 12,
           ),

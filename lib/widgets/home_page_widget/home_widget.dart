@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:serbisyo_mobileapp/pages/custom_request_page.dart';
 
 class HomeWidget extends StatelessWidget {
   const HomeWidget({super.key});
@@ -41,7 +42,34 @@ class HomeWidget extends StatelessWidget {
                     ),
                   ),
 
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      PageRouteBuilder(
+                        transitionDuration: Duration(milliseconds: 350),
+                        reverseTransitionDuration: Duration(milliseconds: 300),
+                        pageBuilder: (context, animation, secondaryAnimation) => CustomRequestPage(),
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                          final offsetTween = Tween<Offset>(begin: Offset(0, 0.08), end: Offset.zero)
+                              .chain(CurveTween(curve: Curves.easeInOut));
+                          final fadeTween = Tween<double>(begin: 0.0, end: 1.0)
+                              .chain(CurveTween(curve: Curves.easeInOut));
+                          final scaleTween = Tween<double>(begin: 0.98, end: 1.0)
+                              .chain(CurveTween(curve: Curves.easeInOut));
+
+                          return FadeTransition(
+                            opacity: animation.drive(fadeTween),
+                            child: SlideTransition(
+                              position: animation.drive(offsetTween),
+                              child: ScaleTransition(
+                                scale: animation.drive(scaleTween),
+                                child: child,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
                   child: Text(
                     style: TextStyle(fontSize: 10, color: Color(0xffFFFFFF)),
                     'Request Custom Services',
@@ -52,7 +80,6 @@ class HomeWidget extends StatelessWidget {
           ),
           Expanded(
             child: Container(
-
               height: 237,
               width: 367, 
               decoration: BoxDecoration(

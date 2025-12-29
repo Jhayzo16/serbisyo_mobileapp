@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/pages/home_page.dart';
 
 class LoginUserButton extends StatelessWidget {
-  const LoginUserButton({super.key});
+  LoginUserButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,29 +15,29 @@ class LoginUserButton extends StatelessWidget {
             onPressed: () {
               // Navigate to HomePage
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const HomePage()),
+                MaterialPageRoute(builder: (_) => HomePage()),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2D6B7A),
+              backgroundColor: Color(0xFF2D6B7A),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
+            child: Text(
               'LOGIN',
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
         ),
 
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
 
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               'Don\'t have an account? ',
               style: TextStyle(color: Color(0xFF6B7280)),
             ),
@@ -45,7 +45,7 @@ class LoginUserButton extends StatelessWidget {
               onTap: () {
                 // TODO: navigate to sign up
               },
-              child: const Text(
+              child: Text(
                 'Sign Up',
                 style: TextStyle(
                   color: Color(0xFF25607A),

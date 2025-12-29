@@ -35,7 +35,7 @@ class HomeWidgetCategory extends StatelessWidget {
                 Container(
                   height: 72,
                   decoration: BoxDecoration(
-                    color: const Color(0xff356785),
+                    color: Color(0xff356785),
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(12),
                     ),
@@ -55,7 +55,7 @@ class HomeWidgetCategory extends StatelessWidget {
                   child: Center(
                     child: Text(
                       label,
-                      style: const TextStyle(fontSize: 12, color: Colors.black),
+                      style: TextStyle(fontSize: 12, color: Colors.black),
                     ),
                   ),
                 ),

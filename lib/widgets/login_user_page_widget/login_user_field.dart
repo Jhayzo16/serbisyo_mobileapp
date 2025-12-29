@@ -5,7 +5,7 @@ class LoginUserField extends StatefulWidget {
   final bool isPassword;
   final TextInputType keyboardType;
 
-  const LoginUserField({
+  LoginUserField({
     super.key,
     required this.hintText,
     this.isPassword = false,
@@ -30,10 +30,10 @@ class _LoginUserFieldState extends State<LoginUserField> {
     return Container(
       height: 56,
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           Expanded(
@@ -42,7 +42,7 @@ class _LoginUserFieldState extends State<LoginUserField> {
               obscureText: _obscure,
               decoration: InputDecoration(
                 hintText: widget.hintText,
-                hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
+                hintStyle: TextStyle(color: Color(0xFF9CA3AF)),
                 border: InputBorder.none,
               ),
             ),
@@ -53,12 +53,12 @@ class _LoginUserFieldState extends State<LoginUserField> {
                 _obscure
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
-                color: const Color(0xFF9CA3AF),
+                color: Color(0xFF9CA3AF),
               ),
               onPressed: () => setState(() => _obscure = !_obscure),
             )
           else
-            const Icon(Icons.mail_outline, color: Color(0xFF9CA3AF)),
+            Icon(Icons.mail_outline, color: Color(0xFF9CA3AF)),
         ],
       ),
     );
@@ -66,7 +66,7 @@ class _LoginUserFieldState extends State<LoginUserField> {
 }
 
 class LoginUserFields extends StatefulWidget {
-  const LoginUserFields({super.key});
+  LoginUserFields({super.key});
 
   @override
   State<LoginUserFields> createState() => _LoginUserFieldsState();
@@ -80,15 +80,15 @@ class _LoginUserFieldsState extends State<LoginUserFields> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 8),
-        const LoginUserField(
+        SizedBox(height: 8),
+        LoginUserField(
           hintText: 'Email Address',
           isPassword: false,
           keyboardType: TextInputType.emailAddress,
         ),
-        const SizedBox(height: 16),
-        const LoginUserField(hintText: 'Password', isPassword: true),
-        const SizedBox(height: 12),
+        SizedBox(height: 16),
+        LoginUserField(hintText: 'Password', isPassword: true),
+        SizedBox(height: 12),
         // Keep the row height equal to the field so checkbox aligns vertically
         SizedBox(
           height: 56,
@@ -103,22 +103,22 @@ class _LoginUserFieldsState extends State<LoginUserFields> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  activeColor: const Color(0xFF2D6B7A),
+                  activeColor: Color(0xFF2D6B7A),
                   checkColor: Colors.white,
                   onChanged: (v) => setState(() => _remember = v ?? false),
                 ),
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Remember Me',
                 style: TextStyle(fontSize: 13, color: Color(0xFF374151)),
               ),
-              const Spacer(),
+              Spacer(),
               GestureDetector(
                 onTap: () {
                   // TODO: navigate to forgot password
                 },
-                child: const Text(
+                child: Text(
                   'Forgot Password?',
                   style: TextStyle(fontSize: 13, color: Color(0xFF25607A)),
                 ),
