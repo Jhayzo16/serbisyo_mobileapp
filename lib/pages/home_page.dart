@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/widgets/homepagewidg/home_widget.dart';
+import 'package:serbisyo_mobileapp/widgets/homepagewidg/home_widget_category.dart';
+import 'package:serbisyo_mobileapp/widgets/homepagewidg/home_widget_search.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -9,9 +11,46 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: appBar(),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           HomeWidget(),
+          HomeWidgetSearch(),
+          HomeWidgetCategory()
         ],
+      ),
+      bottomNavigationBar: Container(
+        height: 86,
+        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+          boxShadow: [
+            BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, -6)),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Home (selected)
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Color(0xff356785),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.home, color: Colors.white),
+            ),
+
+            // Tasks
+            Icon(Icons.check_box_outlined, color: Color(0xffBFBFBF)),
+
+            // Chat
+            Icon(Icons.chat_bubble_outline, color: Color(0xffBFBFBF)),
+
+            // Profile
+            Icon(Icons.person_outline, color: Color(0xffBFBFBF)),
+          ],
+        ),
       ),
     );
   }
