@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/pages/home_page.dart';
+import 'package:serbisyo_mobileapp/pages/login_user_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: "Poppins"
       ),
-      home: HomePage()
+      home: LoginUserPage(),
     );
   }
 }

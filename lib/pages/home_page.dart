@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:serbisyo_mobileapp/widgets/homepagewidg/home_widget.dart';
-import 'package:serbisyo_mobileapp/widgets/homepagewidg/home_widget_category.dart';
-import 'package:serbisyo_mobileapp/widgets/homepagewidg/home_widget_search.dart';
+import 'package:serbisyo_mobileapp/widgets/home_page_widget/home_widget.dart';
+import 'package:serbisyo_mobileapp/widgets/home_page_widget/home_widget_category.dart';
+import 'package:serbisyo_mobileapp/widgets/home_page_widget/home_widget_search.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

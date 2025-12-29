@@ -36,7 +36,9 @@ class HomeWidgetCategory extends StatelessWidget {
                   height: 72,
                   decoration: BoxDecoration(
                     color: const Color(0xff356785),
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
                   ),
                   child: Center(
                     child: Icon(icon, size: 36, color: Colors.white),
@@ -46,15 +48,14 @@ class HomeWidgetCategory extends StatelessWidget {
                   height: 36,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(12),
+                    ),
                   ),
                   child: Center(
                     child: Text(
                       label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xff356785),
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.black),
                     ),
                   ),
                 ),
@@ -87,7 +88,7 @@ class HomeWidgetCategory extends StatelessWidget {
                   'See more',
                   style: TextStyle(color: Color(0xff9B9B9B), fontSize: 12),
                 ),
-              )
+              ),
             ],
           ),
           SizedBox(height: 12),
@@ -99,9 +100,14 @@ class HomeWidgetCategory extends StatelessWidget {
             crossAxisSpacing: 16,
             childAspectRatio: 0.85,
             children: categories
-                .map((c) => buildCategoryItem(c['label'] as String, c['icon'] as IconData))
+                .map(
+                  (c) => buildCategoryItem(
+                    c['label'] as String,
+                    c['icon'] as IconData,
+                  ),
+                )
                 .toList(),
-          )
+          ),
         ],
       ),
     );
