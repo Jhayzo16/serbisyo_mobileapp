@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
-
 import 'dart:async';
-
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-
 import 'package:serbisyo_mobileapp/models/customreq_model.dart';
 
-/// Abstraction for submitting a request. This follows DIP so it can be
-/// mocked or replaced by a real API implementation without changing the UI.
+
 abstract class RequestSubmitter {
   const RequestSubmitter();
   Future<void> submit(CustomRequestModel request, BuildContext context);
 }
 
-/// Default local submitter used during development.
+
 class LocalRequestSubmitter implements RequestSubmitter {
   const LocalRequestSubmitter();
   @override
   Future<void> submit(CustomRequestModel request, BuildContext context) async {
-    // Simulate network latency
+
     final messenger = ScaffoldMessenger.of(context);
     await Future.delayed(Duration(milliseconds: 300));
     messenger.showSnackBar(
@@ -28,8 +24,7 @@ class LocalRequestSubmitter implements RequestSubmitter {
   }
 }
 
-/// Page shell – keeps the page structure simple and delegates work to
-/// smaller widgets (Single Responsibility Principle).
+
 class CustomRequestPage extends StatelessWidget {
   final RequestSubmitter submitter;
   const CustomRequestPage({super.key, this.submitter = const LocalRequestSubmitter()});
@@ -69,12 +64,6 @@ class CustomRequestPage extends StatelessWidget {
     );
   }
 }
-
-
-
-/// The form widget contains all state and validation. It depends on an
-/// injected [RequestSubmitter] so it doesn't take responsibility for how
-/// submissions are performed (SRP + DIP).
 class CustomRequestForm extends StatefulWidget {
   final RequestSubmitter submitter;
   const CustomRequestForm({super.key, required this.submitter});
@@ -422,7 +411,11 @@ class _CustomRequestFormState extends State<CustomRequestForm> {
                 backgroundColor: primaryColor,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('Submit Request', style: TextStyle(fontWeight: FontWeight.w700)),
+              child: Text(
+
+                'Submit Request', style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700)),
             ),
           ),
         ],

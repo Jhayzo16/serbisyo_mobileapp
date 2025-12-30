@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:serbisyo_mobileapp/pages/cleaning_services_page.dart';
 
 class HomeWidgetCategory extends StatelessWidget {
   const HomeWidgetCategory({super.key});
@@ -15,54 +16,65 @@ class HomeWidgetCategory extends StatelessWidget {
     ];
 
     Widget buildCategoryItem(String label, IconData icon) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 100,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 8,
-                  offset: Offset(0, 4),
-                ),
-              ],
+      final VoidCallback? onTap = label == 'Cleaning'
+          ? () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) =>  CleaningServicesPage()),
+              );
+            }
+          : null;
+
+      return GestureDetector(
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 100,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: Color(0xff356785),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
+                    ),
+                    child: Center(
+                      child: Icon(icon, size: 36, color: Colors.white),
+                    ),
+                  ),
+                  Container(
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(12),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        label,
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Column(
-              children: [
-                Container(
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: Color(0xff356785),
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(12),
-                    ),
-                  ),
-                  child: Center(
-                    child: Icon(icon, size: 36, color: Colors.white),
-                  ),
-                ),
-                Container(
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(12),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      label,
-                      style: TextStyle(fontSize: 12, color: Colors.black),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
