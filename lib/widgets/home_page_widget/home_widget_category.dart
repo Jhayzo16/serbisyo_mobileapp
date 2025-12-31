@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:serbisyo_mobileapp/pages/cleaning_services_page.dart';
+import 'package:serbisyo_mobileapp/pages/service_category_page.dart';
+import 'package:serbisyo_mobileapp/models/cleaning_services/cleaning_services_data.dart';
+import 'package:serbisyo_mobileapp/models/plumbing_services/plumbing_services_data.dart';
+import 'package:serbisyo_mobileapp/models/quick_errand_services/quick_errand_services_data.dart';
 
 class HomeWidgetCategory extends StatelessWidget {
   const HomeWidgetCategory({super.key});
@@ -16,13 +19,39 @@ class HomeWidgetCategory extends StatelessWidget {
     ];
 
     Widget buildCategoryItem(String label, IconData icon) {
-      final VoidCallback? onTap = label == 'Cleaning'
-          ? () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) =>  CleaningServicesPage()),
-              );
-            }
-          : null;
+      final VoidCallback? onTap = switch (label) {
+        'Cleaning' => () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const ServiceCategoryPage(
+                title: 'Cleaning Services',
+                services: cleaningServices,
+              ),
+            ),
+          );
+        },
+        'Plumbing' => () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const ServiceCategoryPage(
+                title: 'Plumbing Services',
+                services: plumbingServices,
+              ),
+            ),
+          );
+        },
+        'Quick Errand' => () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const ServiceCategoryPage(
+                title: 'Quick Errand Services',
+                services: quickErrandServices,
+              ),
+            ),
+          );
+        },
+        _ => null,
+      };
 
       return GestureDetector(
         onTap: onTap,

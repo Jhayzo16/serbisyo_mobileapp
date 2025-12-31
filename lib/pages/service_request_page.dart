@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:serbisyo_mobileapp/models/cleaning_services/cleaning_service_model.dart';
+import 'package:serbisyo_mobileapp/models/service_item_model.dart';
 
-class CleaningRequestPage extends StatelessWidget {
-  final CleaningServiceModel service;
+class ServiceRequestPage extends StatelessWidget {
+  final ServiceItemModel service;
 
-  const CleaningRequestPage({super.key, required this.service});
+  const ServiceRequestPage({super.key, required this.service});
 
   String _formatPeso(int amount) {
-    final formatted = amount
-        .toString()
-        .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => ',');
+    final formatted = amount.toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (m) => ',',
+    );
     return '₱$formatted';
   }
 
@@ -66,25 +67,27 @@ class CleaningRequestPage extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.access_time_outlined,
-                        size: 16,
-                        color: Color(0xff9B9B9B),
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        service.duration,
-                        style: TextStyle(
-                          fontSize: 12,
+                  if ((service.duration ?? '').trim().isNotEmpty) ...[
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_outlined,
+                          size: 16,
                           color: Color(0xff9B9B9B),
-                          fontWeight: FontWeight.w500,
                         ),
-                      ),
-                    ],
-                  ),
+                        SizedBox(width: 8),
+                        Text(
+                          service.duration!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xff9B9B9B),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -99,7 +102,7 @@ class CleaningRequestPage extends StatelessWidget {
                 'Date & time',
               ),
             ),
-            CleaningRequestForm(service: service),
+            ServiceRequestForm(service: service),
           ],
         ),
       ),
@@ -107,16 +110,16 @@ class CleaningRequestPage extends StatelessWidget {
   }
 }
 
-class CleaningRequestForm extends StatefulWidget {
-  final CleaningServiceModel service;
+class ServiceRequestForm extends StatefulWidget {
+  final ServiceItemModel service;
 
-  const CleaningRequestForm({super.key, required this.service});
+  const ServiceRequestForm({super.key, required this.service});
 
   @override
-  State<CleaningRequestForm> createState() => _CleaningRequestFormState();
+  State<ServiceRequestForm> createState() => _ServiceRequestFormState();
 }
 
-class _CleaningRequestFormState extends State<CleaningRequestForm> {
+class _ServiceRequestFormState extends State<ServiceRequestForm> {
   final _formKey = GlobalKey<FormState>();
   final _locationController = TextEditingController();
   final _notesController = TextEditingController();
@@ -232,9 +235,7 @@ class _CleaningRequestFormState extends State<CleaningRequestForm> {
 
       _locationController.text = label;
     } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(_locationErrorMessage(e))),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(_locationErrorMessage(e))));
     } finally {
       if (mounted) setState(() => _isFindingLocation = false);
     }
@@ -291,17 +292,14 @@ class _CleaningRequestFormState extends State<CleaningRequestForm> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Request confirmed')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Request confirmed')));
   }
 
   @override
   Widget build(BuildContext context) {
-    final textFieldStyle = TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w700,
-    );
+    final textFieldStyle = TextStyle(fontSize: 14, fontWeight: FontWeight.w700);
 
     return Container(
       margin: EdgeInsets.only(left: 40, right: 40, top: 12, bottom: 40),
@@ -374,8 +372,9 @@ class _CleaningRequestFormState extends State<CleaningRequestForm> {
                               height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation(primaryColor),
+                                valueColor: AlwaysStoppedAnimation(
+                                  primaryColor,
+                                ),
                               ),
                             )
                           : Icon(

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-class CleaningServiceModel {
+class ServiceItemModel {
   final String name;
   final String description;
   final int price;
-  final String duration;
+  final String? duration;
   final double rating;
   final IconData icon;
 
-  const CleaningServiceModel({
+  const ServiceItemModel({
     required this.name,
     required this.description,
     required this.price,
-    required this.duration,
+    this.duration,
     required this.rating,
     required this.icon,
   });
