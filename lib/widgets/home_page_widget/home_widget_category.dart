@@ -10,15 +10,15 @@ class HomeWidgetCategory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categories = [
-      {'label': 'Cleaning', 'icon': Icons.cleaning_services},
-      {'label': 'Plumbing', 'icon': Icons.plumbing},
-      {'label': 'Quick Errand', 'icon': Icons.directions_run},
-      {'label': 'Pet Care', 'icon': Icons.pets},
-      {'label': 'Car Repair', 'icon': Icons.build},
-      {'label': 'Delivery', 'icon': Icons.local_shipping},
+      {'label': 'Cleaning', 'icon': 'assets/icons/cleaning_icon.png'},
+      {'label': 'Plumbing', 'icon': 'assets/icons/plumbing_icon.png'},
+      {'label': 'Quick Errand', 'icon': 'assets/icons/errand_icon.png'},
+      {'label': 'Pet Care', 'icon': 'assets/icons/pet_icon.png'},
+      {'label': 'Car Repair', 'icon': 'assets/icons/carr_repair.png'},
+      {'label': 'Delivery', 'icon': 'assets/icons/car_icon.png'},
     ];
 
-    Widget buildCategoryItem(String label, IconData icon) {
+    Widget buildCategoryItem(String label, String iconAssetPath) {
       final VoidCallback? onTap = switch (label) {
         'Cleaning' => () {
           Navigator.of(context).push(
@@ -81,7 +81,11 @@ class HomeWidgetCategory extends StatelessWidget {
                       ),
                     ),
                     child: Center(
-                      child: Icon(icon, size: 36, color: Colors.white),
+                      child: ImageIcon(
+                        AssetImage(iconAssetPath),
+                        size: 36,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                   Container(
@@ -144,7 +148,7 @@ class HomeWidgetCategory extends StatelessWidget {
                 .map(
                   (c) => buildCategoryItem(
                     c['label'] as String,
-                    c['icon'] as IconData,
+                    c['icon'] as String,
                   ),
                 )
                 .toList(),
