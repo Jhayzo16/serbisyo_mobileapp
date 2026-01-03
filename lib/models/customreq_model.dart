@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Model representing the custom request payload.
+
 class CustomRequestModel {
   final String title;
   final String description;

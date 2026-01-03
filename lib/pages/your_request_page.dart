@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:serbisyo_mobileapp/pages/chat_page.dart';
 import 'package:serbisyo_mobileapp/pages/home_page.dart';
 import 'package:serbisyo_mobileapp/models/your_request_model.dart';
 import 'package:serbisyo_mobileapp/widgets/your_request_page/tab_switcher_widget.dart';
@@ -271,10 +272,17 @@ class _YourRequestPageState extends State<YourRequestPage> {
           ),
 
           // Chat
-          ImageIcon(
-            const AssetImage('assets/icons/message_icon.png'),
-            color: _unselectedColor,
-            size: 26,
+          GestureDetector(
+            onTap: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
+            },
+            child: ImageIcon(
+              const AssetImage('assets/icons/message_icon.png'),
+              color: _unselectedColor,
+              size: 26,
+            ),
           ),
 
           // Profile

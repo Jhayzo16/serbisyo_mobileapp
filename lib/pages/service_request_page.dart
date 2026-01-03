@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:serbisyo_mobileapp/models/service_item_model.dart';
+import 'package:serbisyo_mobileapp/pages/succesful_request_page.dart';
 
 class ServiceRequestPage extends StatelessWidget {
   final ServiceItemModel service;
@@ -292,9 +293,9 @@ class _ServiceRequestFormState extends State<ServiceRequestForm> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Request confirmed')));
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => SuccesfulRequestPage()),
+    );
   }
 
   @override

@@ -67,7 +67,6 @@ class _LoginUserFieldState extends State<LoginUserField> {
 
 class LoginUserFields extends StatefulWidget {
   LoginUserFields({super.key});
-
   @override
   State<LoginUserFields> createState() => _LoginUserFieldsState();
 }
@@ -89,7 +88,7 @@ class _LoginUserFieldsState extends State<LoginUserFields> {
         SizedBox(height: 16),
         LoginUserField(hintText: 'Password', isPassword: true),
         SizedBox(height: 12),
-        // Keep the row height equal to the field so checkbox aligns vertically
+      
         SizedBox(
           height: 56,
           child: Row(
@@ -116,7 +115,7 @@ class _LoginUserFieldsState extends State<LoginUserFields> {
               Spacer(),
               GestureDetector(
                 onTap: () {
-                  // TODO: navigate to forgot password
+              
                 },
                 child: Text(
                   'Forgot Password?',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:serbisyo_mobileapp/pages/chat_page.dart';
 import 'package:serbisyo_mobileapp/pages/your_request_page.dart';
 import 'package:serbisyo_mobileapp/widgets/home_page_widget/home_widget.dart';
 import 'package:serbisyo_mobileapp/widgets/home_page_widget/home_widget_category.dart';
@@ -52,9 +53,9 @@ class HomePage extends StatelessWidget {
             // Tasks
             GestureDetector(
               onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) =>  YourRequestPage()),
-                );
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => YourRequestPage()));
               },
               child: ImageIcon(
                 const AssetImage('assets/icons/request_icon.png'),
@@ -64,10 +65,17 @@ class HomePage extends StatelessWidget {
             ),
 
             // Chat
-            ImageIcon(
-              const AssetImage('assets/icons/message_icon.png'),
-              color: _unselectedColor,
-              size: 26,
+            GestureDetector(
+              onTap: () {
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
+              },
+              child: ImageIcon(
+                const AssetImage('assets/icons/message_icon.png'),
+                color: _unselectedColor,
+                size: 26,
+              ),
             ),
 
             // Profile

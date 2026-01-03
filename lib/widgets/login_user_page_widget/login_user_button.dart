@@ -43,7 +43,7 @@ class LoginUserButton extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                // TODO: navigate to sign up
+            
               },
               child: Text(
                 'Sign Up',
