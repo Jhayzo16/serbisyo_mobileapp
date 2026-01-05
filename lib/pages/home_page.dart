@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/pages/chat_page.dart';
+import 'package:serbisyo_mobileapp/pages/profile_page.dart';
 import 'package:serbisyo_mobileapp/pages/your_request_page.dart';
 import 'package:serbisyo_mobileapp/widgets/home_page_widget/home_widget.dart';
 import 'package:serbisyo_mobileapp/widgets/home_page_widget/home_widget_category.dart';
@@ -79,10 +80,17 @@ class HomePage extends StatelessWidget {
             ),
 
             // Profile
-            ImageIcon(
-              const AssetImage('assets/icons/profile_icon.png'),
-              color: _unselectedColor,
-              size: 26,
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const ProfilePage()),
+                );
+              },
+              child: ImageIcon(
+                const AssetImage('assets/icons/profile_icon.png'),
+                color: _unselectedColor,
+                size: 26,
+              ),
             ),
           ],
         ),

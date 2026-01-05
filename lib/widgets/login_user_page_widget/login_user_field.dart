@@ -4,12 +4,16 @@ class LoginUserField extends StatefulWidget {
   final String hintText;
   final bool isPassword;
   final TextInputType keyboardType;
+  final TextEditingController? controller;
+  final TextInputAction? textInputAction;
 
   LoginUserField({
     super.key,
     required this.hintText,
     this.isPassword = false,
     this.keyboardType = TextInputType.text,
+    this.controller,
+    this.textInputAction,
   });
 
   @override
@@ -38,7 +42,9 @@ class _LoginUserFieldState extends State<LoginUserField> {
         children: [
           Expanded(
             child: TextField(
+              controller: widget.controller,
               keyboardType: widget.keyboardType,
+              textInputAction: widget.textInputAction,
               obscureText: _obscure,
               decoration: InputDecoration(
                 hintText: widget.hintText,
@@ -66,7 +72,16 @@ class _LoginUserFieldState extends State<LoginUserField> {
 }
 
 class LoginUserFields extends StatefulWidget {
-  LoginUserFields({super.key});
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final VoidCallback? onForgotPassword;
+
+  const LoginUserFields({
+    super.key,
+    required this.emailController,
+    required this.passwordController,
+    this.onForgotPassword,
+  });
   @override
   State<LoginUserFields> createState() => _LoginUserFieldsState();
 }
@@ -84,9 +99,16 @@ class _LoginUserFieldsState extends State<LoginUserFields> {
           hintText: 'Email Address',
           isPassword: false,
           keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          controller: widget.emailController,
         ),
         SizedBox(height: 16),
-        LoginUserField(hintText: 'Password', isPassword: true),
+        LoginUserField(
+          hintText: 'Password',
+          isPassword: true,
+          textInputAction: TextInputAction.done,
+          controller: widget.passwordController,
+        ),
         SizedBox(height: 12),
       
         SizedBox(
@@ -114,9 +136,7 @@ class _LoginUserFieldsState extends State<LoginUserFields> {
               ),
               Spacer(),
               GestureDetector(
-                onTap: () {
-              
-                },
+                onTap: widget.onForgotPassword,
                 child: Text(
                   'Forgot Password?',
                   style: TextStyle(fontSize: 13, color: Color(0xFF25607A)),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/models/your_request_model.dart';
+import 'package:serbisyo_mobileapp/widgets/app_elevated_card.dart';
 
 class YourRequestCard extends StatelessWidget {
   const YourRequestCard({
@@ -61,11 +62,7 @@ class YourRequestCard extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: fontSize,
-              color: _mutedText,
-              
-            ),
+            style: TextStyle(fontSize: fontSize, color: _mutedText),
           ),
         ),
       ],
@@ -89,13 +86,11 @@ class YourRequestCard extends StatelessWidget {
       child: SizedBox(
         width: 311,
         height: cardHeight,
-        child: Container(
+        child: AppElevatedCard(
+          elevation: 6,
+          borderRadius: 14,
+          borderSide: const BorderSide(color: Colors.black38, width: 0.9),
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.black38, width: 0.9),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

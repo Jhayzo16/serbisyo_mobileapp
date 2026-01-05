@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:serbisyo_mobileapp/pages/home_page.dart';
 
 class LoginUserButton extends StatelessWidget {
-  LoginUserButton({super.key});
+  final VoidCallback? onLogin;
+  final VoidCallback? onSignUp;
+  final bool isLoading;
+
+  const LoginUserButton({
+    super.key,
+    this.onLogin,
+    this.onSignUp,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -12,12 +20,7 @@ class LoginUserButton extends StatelessWidget {
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
-            onPressed: () {
-              // Navigate to HomePage
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => HomePage()),
-              );
-            },
+            onPressed: isLoading ? null : onLogin,
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFF2D6B7A),
               foregroundColor: Colors.white,
@@ -42,9 +45,7 @@ class LoginUserButton extends StatelessWidget {
               style: TextStyle(color: Color(0xFF6B7280)),
             ),
             GestureDetector(
-              onTap: () {
-            
-              },
+              onTap: isLoading ? null : onSignUp,
               child: Text(
                 'Sign Up',
                 style: TextStyle(

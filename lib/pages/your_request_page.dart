@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:serbisyo_mobileapp/pages/chat_page.dart';
 import 'package:serbisyo_mobileapp/pages/home_page.dart';
+import 'package:serbisyo_mobileapp/pages/profile_page.dart';
 import 'package:serbisyo_mobileapp/models/your_request_model.dart';
 import 'package:serbisyo_mobileapp/widgets/your_request_page/tab_switcher_widget.dart';
 import 'package:serbisyo_mobileapp/widgets/your_request_page/your_request_card.dart';
@@ -15,127 +18,93 @@ class YourRequestPage extends StatefulWidget {
 class _YourRequestPageState extends State<YourRequestPage> {
   int _selectedTabIndex = 0;
 
+  final _db = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
+
   static const _selectedColor = Color(0xff356785);
   static const _unselectedColor = Color(0xffBFBFBF);
 
+  RequestStatus _parseStatus(Object? raw) {
+    final v = (raw ?? 'pending').toString().toLowerCase();
+    if (v == 'inprogress' || v == 'in_progress') return RequestStatus.inProgress;
+    if (v == 'completed' || v == 'done') return RequestStatus.completed;
+    return RequestStatus.pending;
+  }
+
+  String _iconForRequest({required String type, required String? title}) {
+    if (type == 'custom') return 'assets/icons/custom_icon.png';
+    final t = (title ?? '').toLowerCase();
+    if (t.contains('window')) return 'assets/icons/window_cleaning_icon.png';
+    if (t.contains('clean')) return 'assets/icons/cleaning_icon.png';
+    if (t.contains('pet')) return 'assets/icons/pet_icon.png';
+    return 'assets/icons/custom_icon.png';
+  }
+
+  DateTime _scheduledAtFrom(Map<String, dynamic> data) {
+    final dateRaw = data['date'];
+    final timeRaw = data['time'];
+
+    DateTime? date;
+    if (dateRaw is String && dateRaw.isNotEmpty) {
+      date = DateTime.tryParse(dateRaw);
+    }
+
+    int hour = 0;
+    int minute = 0;
+    if (timeRaw is String && timeRaw.isNotEmpty) {
+      final parts = timeRaw.split(':');
+      if (parts.isNotEmpty) hour = int.tryParse(parts[0]) ?? 0;
+      if (parts.length > 1) minute = int.tryParse(parts[1]) ?? 0;
+    }
+
+    if (date != null) {
+      return DateTime(date.year, date.month, date.day, hour, minute);
+    }
+
+    final createdAt = data['createdAt'];
+    if (createdAt is Timestamp) return createdAt.toDate();
+    return DateTime.now();
+  }
+
+  YourRequestModel _toRequestModel(Map<String, dynamic> data) {
+    final type = (data['type'] ?? 'service').toString();
+
+    final iconFromDb = data['iconAssetPath'];
+    final iconAssetPath = (iconFromDb is String && iconFromDb.trim().isNotEmpty)
+        ? iconFromDb.trim()
+        : null;
+
+    String title;
+    if (type == 'service') {
+      final service = data['service'];
+      if (service is Map) {
+        title = (service['name'] ?? 'Service Request').toString();
+      } else {
+        title = 'Service Request';
+      }
+    } else {
+      title = (data['title'] ?? 'Custom Request').toString();
+    }
+
+    final status = _parseStatus(data['status']);
+    final scheduledAt = _scheduledAtFrom(data);
+    final location = data['location'] is String ? data['location'] as String : null;
+
+    return YourRequestModel(
+      status: status,
+      title: title,
+      scheduledAt: scheduledAt,
+      iconAssetPath: iconAssetPath ?? _iconForRequest(type: type, title: title),
+      location: location,
+      provider: null,
+      duration: null,
+      totalPaid: null,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final pendingRequests = <YourRequestModel>[
-      YourRequestModel(
-        status: RequestStatus.pending,
-        title: 'Cleaning Service',
-        scheduledAt: DateTime(2026, 1, 9, 17, 30),
-        iconAssetPath: 'assets/icons/cleaning_icon.png',
-      ),
-      YourRequestModel(
-        status: RequestStatus.pending,
-        title: 'Electrical Problem',
-        scheduledAt: DateTime(2026, 2, 6, 7, 30),
-        iconAssetPath: 'assets/icons/custom_icon.png',
-      ),
-      YourRequestModel(
-        status: RequestStatus.pending,
-        title: 'Pet Care',
-        scheduledAt: DateTime(2026, 12, 17, 15, 30),
-        iconAssetPath: 'assets/icons/pet_icon.png',
-      ),
-    ];
-
-    final inProgressRequests = <YourRequestModel>[
-      YourRequestModel(
-        status: RequestStatus.inProgress,
-        title: 'Cleaning Service',
-        scheduledAt: DateTime(2026, 1, 10, 10, 0),
-        iconAssetPath: 'assets/icons/cleaning_icon.png',
-        location: 'Purok Pagibig1, Visayan Village',
-        provider: RequestProviderModel(
-          name: 'Rosalinda Cruz',
-          avatarAssetPath: 'assets/icons/Rosalinda.png',
-          rating: 4.9,
-          reviewCount: 120,
-        ),
-      ),
-      YourRequestModel(
-        status: RequestStatus.inProgress,
-        title: 'Electrical Problem',
-        scheduledAt: DateTime(2026, 2, 7, 9, 30),
-        iconAssetPath: 'assets/icons/custom_icon.png',
-        location: 'Purok Rafael, Magugpo South',
-        provider: RequestProviderModel(
-          name: 'Armando Rosales',
-          avatarAssetPath: 'assets/icons/Armando.png',
-          rating: 4.5,
-          reviewCount: 118,
-        ),
-      ),
-      YourRequestModel(
-        status: RequestStatus.inProgress,
-        title: 'Pet Care',
-        scheduledAt: DateTime(2026, 12, 17, 15, 30),
-        iconAssetPath: 'assets/icons/pet_icon.png',
-        location: 'Purok Rambutan, Visayan Village',
-        provider: RequestProviderModel(
-          name: 'Corazon Dalisay',
-          avatarAssetPath: 'assets/icons/Corazon.png',
-          rating: 4.2,
-          reviewCount: 98,
-        ),
-      ),
-    ];
-
-    final completedRequests = <YourRequestModel>[
-      YourRequestModel(
-        status: RequestStatus.completed,
-        title: 'Cleaning Service',
-        scheduledAt: DateTime(2026, 1, 9, 17, 30),
-        iconAssetPath: 'assets/icons/cleaning_icon.png',
-        location: 'Purok Pagibig1, Visayan Village',
-        provider: RequestProviderModel(
-          name: 'Rosalinda Cruz',
-          avatarAssetPath: 'assets/icons/Rosalinda.png',
-          rating: 4.9,
-          reviewCount: 120,
-        ),
-        duration: '2hrs',
-        totalPaid: 'P2,500',
-      ),
-      YourRequestModel(
-        status: RequestStatus.completed,
-        title: 'Electrical Problem',
-        scheduledAt: DateTime(2026, 2, 6, 7, 30),
-        iconAssetPath: 'assets/icons/custom_icon.png',
-        location: 'Purok Rafael, Magugpo South',
-        provider: RequestProviderModel(
-          name: 'Armando Rosales',
-          avatarAssetPath: 'assets/icons/Armando.png',
-          rating: 4.5,
-          reviewCount: 118,
-        ),
-        duration: '1hr',
-        totalPaid: 'P3,000',
-      ),
-      YourRequestModel(
-        status: RequestStatus.completed,
-        title: 'Pet Care',
-        scheduledAt: DateTime(2025, 12, 17, 15, 30),
-        iconAssetPath: 'assets/icons/pet_icon.png',
-        location: 'Purok Rambutan, Visayan Village',
-        provider: RequestProviderModel(
-          name: 'Corazon Dalisay',
-          avatarAssetPath: 'assets/icons/Corazon.png',
-          rating: 4.2,
-          reviewCount: 98,
-        ),
-        duration: '4hrs',
-        totalPaid: 'P6,000',
-      ),
-    ];
-
-    final requests = switch (_selectedTabIndex) {
-      0 => pendingRequests,
-      1 => inProgressRequests,
-      _ => completedRequests,
-    };
+    final uid = _auth.currentUser?.uid;
 
     return Scaffold(
       appBar: appBar(),
@@ -153,54 +122,90 @@ class _YourRequestPageState extends State<YourRequestPage> {
           sortIcon(),
           const SizedBox(height: 14),
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 280),
-              reverseDuration: const Duration(milliseconds: 280),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeOutCubic,
-              layoutBuilder: (currentChild, previousChildren) {
-                return Stack(
-                  children: [
-                    ...previousChildren,
-                    if (currentChild != null) currentChild,
-                  ],
-                );
-              },
-              transitionBuilder: (child, animation) {
-                final currentKey = ValueKey<int>(_selectedTabIndex);
-                final isIncoming = child.key == currentKey;
+            child: uid == null
+                ? const SizedBox.shrink()
+                : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: _db
+                        .collection('requests')
+                        .where('userId', isEqualTo: uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      final docs = snapshot.data?.docs ?? const [];
+                      final all = docs
+                          .map((d) => _toRequestModel(d.data()))
+                          .toList(growable: false);
 
-                final position = isIncoming
-                    ? Tween<Offset>(
-                        begin: const Offset(0.12, 0),
-                        end: Offset.zero,
-                      ).animate(animation)
-                    : Tween<Offset>(
-                        begin: Offset.zero,
-                        end: const Offset(-0.12, 0),
-                      ).animate(animation);
+                      final requests = switch (_selectedTabIndex) {
+                        0 => all
+                            .where((r) => r.status == RequestStatus.pending)
+                            .toList(growable: false),
+                        1 => all
+                            .where((r) => r.status == RequestStatus.inProgress)
+                            .toList(growable: false),
+                        _ => all
+                            .where((r) => r.status == RequestStatus.completed)
+                            .toList(growable: false),
+                      };
 
-                return SlideTransition(
-                  position: position,
-                  child: FadeTransition(opacity: animation, child: child),
-                );
-              },
-              child: ListView.separated(
-                key: ValueKey<int>(_selectedTabIndex),
-                padding: const EdgeInsets.only(bottom: 24),
-                itemCount: requests.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 14),
-                itemBuilder: (context, index) {
-                  return YourRequestCard(
-                    request: requests[index],
-                    onViewDetails: () {},
-                    onCancel: () {},
-                    onRateProvider: () {},
-                    onBookAgain: () {},
-                  );
-                },
-              ),
-            ),
+                      if (requests.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No requests yet',
+                            style: TextStyle(color: Color(0xff7C7979)),
+                          ),
+                        );
+                      }
+
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 280),
+                        reverseDuration: const Duration(milliseconds: 280),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeOutCubic,
+                        layoutBuilder: (currentChild, previousChildren) {
+                          return Stack(
+                            children: [
+                              ...previousChildren,
+                              if (currentChild != null) currentChild,
+                            ],
+                          );
+                        },
+                        transitionBuilder: (child, animation) {
+                          final currentKey = ValueKey<int>(_selectedTabIndex);
+                          final isIncoming = child.key == currentKey;
+
+                          final position = isIncoming
+                              ? Tween<Offset>(
+                                  begin: const Offset(0.12, 0),
+                                  end: Offset.zero,
+                                ).animate(animation)
+                              : Tween<Offset>(
+                                  begin: Offset.zero,
+                                  end: const Offset(-0.12, 0),
+                                ).animate(animation);
+
+                          return SlideTransition(
+                            position: position,
+                            child: FadeTransition(opacity: animation, child: child),
+                          );
+                        },
+                        child: ListView.separated(
+                          key: ValueKey<int>(_selectedTabIndex),
+                          padding: const EdgeInsets.only(bottom: 24),
+                          itemCount: requests.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 14),
+                          itemBuilder: (context, index) {
+                            return YourRequestCard(
+                              request: requests[index],
+                              onViewDetails: () {},
+                              onCancel: () {},
+                              onRateProvider: () {},
+                              onBookAgain: () {},
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -286,11 +291,18 @@ class _YourRequestPageState extends State<YourRequestPage> {
           ),
 
           // Profile
-          ImageIcon(
-            const AssetImage('assets/icons/profile_icon.png'),
-            color: _unselectedColor,
-            size: 26,
-          ),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const ProfilePage()),
+                );
+              },
+              child: ImageIcon(
+                const AssetImage('assets/icons/profile_icon.png'),
+                color: _unselectedColor,
+                size: 26,
+              ),
+            ),
         ],
       ),
     );

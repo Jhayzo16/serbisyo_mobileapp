@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:serbisyo_mobileapp/models/message_thread_model.dart';
+import 'package:serbisyo_mobileapp/services/chat_service.dart';
 
 class PrivateChat extends StatefulWidget {
   const PrivateChat({super.key, required this.thread});
@@ -18,14 +21,36 @@ class _PrivateChatState extends State<PrivateChat> {
 
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
+  final _chat = ChatService();
 
-  final List<_ChatMessage> _messages = [
-    const _ChatMessage(text: 'Ako nay bahala sa snack nimo', isMe: true),
-    const _ChatMessage(text: 'Sige sigee salamatt', isMe: false),
-    const _ChatMessage(text: 'Asa naka?', isMe: true),
-    const _ChatMessage(text: 'Otw nako sir', isMe: false),
-    const _ChatMessage(text: 'Hulata rako sa gawas sirr', isMe: false),
-  ];
+  Future<String> _resolvePeerName({required String peerId}) async {
+    final current = widget.thread.name.trim();
+    if (current.isNotEmpty && current.toLowerCase() != 'customer')
+      return current;
+
+    try {
+      Future<String?> fromCollection(String collection) async {
+        final snap = await FirebaseFirestore.instance
+            .collection(collection)
+            .doc(peerId)
+            .get();
+        final data = snap.data();
+        if (data == null) return null;
+
+        final first = (data['firstName'] ?? '').toString().trim();
+        final last = (data['lastName'] ?? '').toString().trim();
+        final full = [first, last].where((s) => s.isNotEmpty).join(' ');
+        return full.isNotEmpty ? full : null;
+      }
+
+      final resolved =
+          await fromCollection('users') ?? await fromCollection('providers');
+      if (resolved != null) return resolved;
+    } catch (_) {
+      // ignore
+    }
+    return current.isNotEmpty ? current : 'Chat';
+  }
 
   @override
   void dispose() {
@@ -38,10 +63,18 @@ class _PrivateChatState extends State<PrivateChat> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    setState(() {
-      _messages.add(_ChatMessage(text: text, isMe: true));
-      _controller.clear();
-    });
+    final senderId = FirebaseAuth.instance.currentUser?.uid;
+    final chatId = widget.thread.chatId;
+    final peerId = widget.thread.peerId.trim();
+    if (senderId == null || chatId.trim().isEmpty || peerId.isEmpty) return;
+
+    _controller.clear();
+    _chat.sendText(
+      chatId: chatId,
+      senderId: senderId,
+      text: text,
+      participantIds: [senderId, peerId],
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
@@ -53,9 +86,12 @@ class _PrivateChatState extends State<PrivateChat> {
     });
   }
 
-  Widget _bubble(BuildContext context, _ChatMessage message) {
+  Widget _bubble(
+    BuildContext context, {
+    required String text,
+    required bool isMe,
+  }) {
     final maxWidth = MediaQuery.sizeOf(context).width * 0.72;
-    final isMe = message.isMe;
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -69,7 +105,7 @@ class _PrivateChatState extends State<PrivateChat> {
             borderRadius: BorderRadius.circular(18),
           ),
           child: Text(
-            message.text,
+            text,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -83,19 +119,55 @@ class _PrivateChatState extends State<PrivateChat> {
 
   @override
   Widget build(BuildContext context) {
+    final me = FirebaseAuth.instance.currentUser?.uid;
+    final chatId = widget.thread.chatId;
+    final peerId = widget.thread.peerId.trim();
+
+    if (me == null || chatId.trim().isEmpty || peerId.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: Text(
+            widget.thread.name,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: _titleColor,
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: const Center(
+          child: Text(
+            'Chat is not available.',
+            style: TextStyle(color: Colors.black45),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(
-          widget.thread.name,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: _titleColor,
-          ),
+        title: FutureBuilder<String>(
+          future: _resolvePeerName(peerId: peerId),
+          builder: (context, snap) {
+            final name = (snap.data ?? widget.thread.name).trim();
+            return Text(
+              name.isNotEmpty ? name : 'Chat',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: _titleColor,
+              ),
+            );
+          },
         ),
         centerTitle: true,
       ),
@@ -103,15 +175,43 @@ class _PrivateChatState extends State<PrivateChat> {
         child: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 8,
-                ),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) =>
-                    _bubble(context, _messages[index]),
+              child: StreamBuilder(
+                stream: _chat.messagesQuery(chatId: chatId).snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text(
+                        'Failed to load messages',
+                        style: TextStyle(color: Colors.black45),
+                      ),
+                    );
+                  }
+
+                  final docs = snapshot.data?.docs ?? const [];
+
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!_scrollController.hasClients) return;
+                    _scrollController.jumpTo(
+                      _scrollController.position.maxScrollExtent,
+                    );
+                  });
+
+                  return ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 8,
+                    ),
+                    itemCount: docs.length,
+                    itemBuilder: (context, index) {
+                      final data = docs[index].data();
+                      final text = (data['text'] ?? '').toString();
+                      final senderId = (data['senderId'] ?? '').toString();
+                      final isMe = senderId == me;
+                      return _bubble(context, text: text, isMe: isMe);
+                    },
+                  );
+                },
               ),
             ),
             Padding(

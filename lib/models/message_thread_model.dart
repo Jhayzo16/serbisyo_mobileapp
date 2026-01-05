@@ -4,6 +4,8 @@ class MessageThreadModel {
   final String timeLabel;
   final int unreadCount;
   final String avatarAssetPath;
+  final String chatId;
+  final String peerId;
 
   const MessageThreadModel({
     required this.name,
@@ -11,6 +13,8 @@ class MessageThreadModel {
     required this.timeLabel,
     required this.unreadCount,
     required this.avatarAssetPath,
+    this.chatId = '',
+    this.peerId = '',
   });
 
   bool get hasUnread => unreadCount > 0;

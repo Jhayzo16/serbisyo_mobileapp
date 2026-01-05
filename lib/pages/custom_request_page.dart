@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:serbisyo_mobileapp/models/customreq_model.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:serbisyo_mobileapp/pages/succesful_request_page.dart';
+import 'package:serbisyo_mobileapp/services/request_service.dart';
 
 
 abstract class RequestSubmitter {
@@ -24,10 +27,38 @@ class LocalRequestSubmitter implements RequestSubmitter {
   }
 }
 
+class FirestoreRequestSubmitter implements RequestSubmitter {
+  final List<XFile> images;
+  const FirestoreRequestSubmitter({required this.images});
+
+  @override
+  Future<void> submit(CustomRequestModel request, BuildContext context) async {
+    final service = RequestService();
+    try {
+      await service.submitCustomRequest(
+        request: request,
+        images: images,
+      );
+      if (!context.mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const SuccesfulRequestPage()),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to submit request')),
+      );
+    }
+  }
+}
+
 
 class CustomRequestPage extends StatelessWidget {
   final RequestSubmitter submitter;
-  const CustomRequestPage({super.key, this.submitter = const LocalRequestSubmitter()});
+  const CustomRequestPage({
+    super.key,
+    this.submitter = const LocalRequestSubmitter(),
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -78,12 +109,13 @@ class _CustomRequestFormState extends State<CustomRequestForm> {
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
   final _budgetController = TextEditingController();
+  final _picker = ImagePicker();
 
   bool _isFindingLocation = false;
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
-  final List<String> _images = [];
+  final List<XFile> _images = [];
 
   Color get primaryColor => const Color(0xFF2D6B7A);
 
@@ -115,9 +147,21 @@ class _CustomRequestFormState extends State<CustomRequestForm> {
     if (t != null) setState(() => _selectedTime = t);
   }
 
-  void _addMockImage() {
-   
-    setState(() => _images.add('photo_${_images.length + 1}.jpg'));
+  Future<void> _pickImages() async {
+    try {
+      final picked = await _picker.pickMultiImage(
+        maxWidth: 1024,
+        imageQuality: 85,
+      );
+      if (picked.isEmpty) return;
+      if (!mounted) return;
+      setState(() => _images.addAll(picked));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to pick images')),
+      );
+    }
   }
 
   Future<void> _findCurrentLocation() async {
@@ -255,10 +299,14 @@ class _CustomRequestFormState extends State<CustomRequestForm> {
       time: _selectedTime,
       location: _locationController.text.trim(),
       budget: _budgetController.text.trim(),
-      images: List.unmodifiable(_images),
+      images: List.unmodifiable(_images.map((x) => x.name)),
     );
 
-    await widget.submitter.submit(model, context);
+    final submitter = widget.submitter is LocalRequestSubmitter
+        ? FirestoreRequestSubmitter(images: List<XFile>.unmodifiable(_images))
+        : widget.submitter;
+
+    await submitter.submit(model, context);
   }
 
   @override
@@ -370,7 +418,7 @@ class _CustomRequestFormState extends State<CustomRequestForm> {
 
           SizedBox(height: 16),
           InkWell(
-            onTap: _addMockImage,
+            onTap: _pickImages,
             child: Row(
               children: [
                 Icon(Icons.upload_file_outlined, color: Color(0xFF6B7280)),
@@ -393,7 +441,13 @@ class _CustomRequestFormState extends State<CustomRequestForm> {
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Center(child: Text(_images[i], textAlign: TextAlign.center, style: TextStyle(fontSize: 10))),
+                  child: Center(
+                    child: Text(
+                      _images[i].name,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 10),
+                    ),
+                  ),
                 ),
                 separatorBuilder: (context, index) => SizedBox(width: 8),
                 itemCount: _images.length,

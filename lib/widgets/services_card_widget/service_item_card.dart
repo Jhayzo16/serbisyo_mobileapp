@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/models/service_item_model.dart';
+import 'package:serbisyo_mobileapp/widgets/app_elevated_card.dart';
 
 class ServiceItemCard extends StatelessWidget {
   const ServiceItemCard({
@@ -51,17 +52,15 @@ class ServiceItemCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AppElevatedCard(
+        elevation: 6,
+        borderRadius: 14,
+        borderSide: BorderSide(color: borderColor, width: selected ? 1.2 : 1.0),
         margin: const EdgeInsets.symmetric(horizontal: 40),
-        width: 312,
-        height: 140,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: borderColor, width: selected ? 1.2 : 1.0),
-          color: Colors.white,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        child: SizedBox(
+          width: 312,
+          height: 140,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,

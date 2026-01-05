@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:serbisyo_mobileapp/models/service_item_model.dart';
 import 'package:serbisyo_mobileapp/pages/succesful_request_page.dart';
+import 'package:serbisyo_mobileapp/services/request_service.dart';
 
 class ServiceRequestPage extends StatelessWidget {
   final ServiceItemModel service;
@@ -124,12 +126,15 @@ class _ServiceRequestFormState extends State<ServiceRequestForm> {
   final _formKey = GlobalKey<FormState>();
   final _locationController = TextEditingController();
   final _notesController = TextEditingController();
+  final _requestService = RequestService();
+  final _picker = ImagePicker();
 
   bool _isFindingLocation = false;
+  bool _isSubmitting = false;
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
-  final List<String> _images = [];
+  final List<XFile> _images = [];
 
   Color get primaryColor => const Color(0xff356785);
 
@@ -159,8 +164,21 @@ class _ServiceRequestFormState extends State<ServiceRequestForm> {
     if (t != null) setState(() => _selectedTime = t);
   }
 
-  void _addMockImage() {
-    setState(() => _images.add('photo_${_images.length + 1}.jpg'));
+  Future<void> _pickImages() async {
+    try {
+      final picked = await _picker.pickMultiImage(
+        maxWidth: 1024,
+        imageQuality: 85,
+      );
+      if (picked.isEmpty) return;
+      if (!mounted) return;
+      setState(() => _images.addAll(picked));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to pick images')),
+      );
+    }
   }
 
   Future<void> _findCurrentLocation() async {
@@ -291,11 +309,35 @@ class _ServiceRequestFormState extends State<ServiceRequestForm> {
     );
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => SuccesfulRequestPage()),
-    );
+
+    final location = _locationController.text.trim();
+    final notes = _notesController.text.trim();
+
+    setState(() => _isSubmitting = true);
+    try {
+      await _requestService.submitServiceRequest(
+        service: widget.service,
+        date: _selectedDate,
+        time: _selectedTime,
+        location: location,
+        notes: notes,
+        images: List<XFile>.unmodifiable(_images),
+      );
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const SuccesfulRequestPage()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to submit request')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
@@ -405,7 +447,7 @@ class _ServiceRequestFormState extends State<ServiceRequestForm> {
             ),
             SizedBox(height: 16),
             InkWell(
-              onTap: _addMockImage,
+              onTap: _pickImages,
               child: Row(
                 children: [
                   Icon(Icons.upload_file_outlined, color: Color(0xFF6B7280)),
@@ -432,7 +474,7 @@ class _ServiceRequestFormState extends State<ServiceRequestForm> {
                     ),
                     child: Center(
                       child: Text(
-                        _images[i],
+                        _images[i].name,
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 10),
                       ),
@@ -449,20 +491,29 @@ class _ServiceRequestFormState extends State<ServiceRequestForm> {
                 width: 210,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: _submit,
+                  onPressed: _isSubmitting ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: Text(
-                    'Confirm Request',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Confirm Request',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                 ),
               ),
             ),

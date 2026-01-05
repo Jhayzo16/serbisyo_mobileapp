@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
 
 class LoginUserLogoWidget extends StatefulWidget {
-  LoginUserLogoWidget({super.key});
+  final bool initialIsUser;
+  final ValueChanged<bool>? onChanged;
+
+  const LoginUserLogoWidget({
+    super.key,
+    this.initialIsUser = true,
+    this.onChanged,
+  });
 
   @override
   State<LoginUserLogoWidget> createState() => _LoginUserLogoWidgetState();
 }
 
 class _LoginUserLogoWidgetState extends State<LoginUserLogoWidget> {
-  bool _isUser = true;
+  late bool _isUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _isUser = widget.initialIsUser;
+  }
 
   void _select(bool isUser) {
     if (_isUser == isUser) return;
     setState(() => _isUser = isUser);
+    widget.onChanged?.call(_isUser);
   }
 
   @override
