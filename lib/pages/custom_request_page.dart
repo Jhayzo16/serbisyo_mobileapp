@@ -354,6 +354,8 @@ class _CustomRequestFormState extends State<CustomRequestForm> {
                           child: Icon(Icons.calendar_today_outlined, color: primaryColor),
                         ),
                       ),
+                      validator: (_) =>
+                          _selectedDate == null ? 'Select a date' : null,
                     ),
                   ),
                 ),
@@ -371,6 +373,8 @@ class _CustomRequestFormState extends State<CustomRequestForm> {
                           child: Icon(Icons.access_time_outlined, color: primaryColor),
                         ),
                       ),
+                      validator: (_) =>
+                          _selectedTime == null ? 'Select a time' : null,
                     ),
                   ),
                 ),

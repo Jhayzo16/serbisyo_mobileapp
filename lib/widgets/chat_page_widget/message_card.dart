@@ -13,6 +13,8 @@ class MessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final avatarUrl = thread.avatarUrl.trim();
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -23,6 +25,8 @@ class MessageCard extends StatelessWidget {
             CircleAvatar(
               radius: 26,
               backgroundImage: AssetImage(thread.avatarAssetPath),
+              foregroundImage:
+                  avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
               backgroundColor: Colors.grey.shade200,
             ),
             const SizedBox(width: 14),

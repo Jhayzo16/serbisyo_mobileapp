@@ -10,8 +10,11 @@ class MessagesPanel extends StatelessWidget {
 
   static const _muted = Color(0xff9B9B9B);
 
-  Future<String> _peerName(String peerId) async {
-    Future<String?> fromCollection(String collection) async {
+  static final Map<String, Future<_PeerInfo>> _peerInfoCache =
+      <String, Future<_PeerInfo>>{};
+
+  static Future<_PeerInfo> _loadPeerInfo(String peerId) async {
+    Future<_PeerInfo?> fromCollection(String collection) async {
       final snap = await FirebaseFirestore.instance
           .collection(collection)
           .doc(peerId)
@@ -22,16 +25,27 @@ class MessagesPanel extends StatelessWidget {
       final first = (data['firstName'] ?? '').toString().trim();
       final last = (data['lastName'] ?? '').toString().trim();
       final full = [first, last].where((s) => s.isNotEmpty).join(' ');
-      return full.isNotEmpty ? full : null;
+      final photoUrl = (data['photoUrl'] ?? '').toString().trim();
+
+      return _PeerInfo(
+        name: full.isNotEmpty ? full : 'Chat',
+        photoUrl: photoUrl,
+      );
     }
 
     try {
       return await fromCollection('users') ??
           await fromCollection('providers') ??
-          'Chat';
+          const _PeerInfo(name: 'Chat', photoUrl: '');
     } catch (_) {
-      return 'Chat';
+      return const _PeerInfo(name: 'Chat', photoUrl: '');
     }
+  }
+
+  Future<_PeerInfo> _peerInfo(String peerId) {
+    final key = peerId.trim();
+    if (key.isEmpty) return Future.value(const _PeerInfo(name: 'Chat', photoUrl: ''));
+    return _peerInfoCache.putIfAbsent(key, () => _loadPeerInfo(key));
   }
 
   @override
@@ -117,20 +131,19 @@ class MessagesPanel extends StatelessWidget {
               final timeLabel =
                   '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
-              return FutureBuilder<String>(
-                future: peerId.isEmpty
-                    ? Future.value('Chat')
-                    : _peerName(peerId),
-                builder: (context, nameSnap) {
-                  final name = nameSnap.data ?? 'Chat';
+              return FutureBuilder<_PeerInfo>(
+                future: _peerInfo(peerId),
+                builder: (context, infoSnap) {
+                  final info = infoSnap.data ?? const _PeerInfo(name: 'Chat', photoUrl: '');
                   final thread = MessageThreadModel(
-                    name: name,
+                    name: info.name,
                     messagePreview: lastText.isNotEmpty
                         ? lastText
                         : 'Say hi 👋',
                     timeLabel: timeLabel,
                     unreadCount: 0,
                     avatarAssetPath: 'assets/icons/profile_icon.png',
+                    avatarUrl: info.photoUrl,
                     chatId: doc.id,
                     peerId: peerId,
                   );
@@ -153,4 +166,11 @@ class MessagesPanel extends StatelessWidget {
       },
     );
   }
+}
+
+class _PeerInfo {
+  final String name;
+  final String photoUrl;
+
+  const _PeerInfo({required this.name, required this.photoUrl});
 }

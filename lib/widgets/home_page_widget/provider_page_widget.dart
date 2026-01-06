@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:serbisyo_mobileapp/models/provider_request_model.dart';
+import 'package:serbisyo_mobileapp/pages/view_more_details.dart';
 import 'package:serbisyo_mobileapp/widgets/home_page_widget/provider_page_card.dart';
 import 'package:serbisyo_mobileapp/widgets/home_page_widget/provider_logotext_widget.dart';
 
@@ -85,7 +86,15 @@ class ProviderPageWidget extends StatelessWidget {
                     return Center(
                       child: ProviderPageCard(
                         request: request,
-                        onViewDetails: () {},
+                        onViewDetails: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => ViewMoreDetails(
+                                requestId: request.requestId,
+                              ),
+                            ),
+                          );
+                        },
                         onAccept: () => _acceptRequest(
                           context,
                           requestId: request.requestId,

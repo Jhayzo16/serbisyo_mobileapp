@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "serbisyo_mobileapp (Cloudinary)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=CLOUDINARY_CLOUD_NAME=dby1b1v49",
+        "--dart-define=CLOUDINARY_UPLOAD_PRESET=serbisyo_mobileapp"
+      ]
+    }
+  ]
+}

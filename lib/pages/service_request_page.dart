@@ -369,6 +369,8 @@ class _ServiceRequestFormState extends State<ServiceRequestForm> {
                             ),
                           ),
                         ),
+                        validator: (_) =>
+                            _selectedDate == null ? 'Select a date' : null,
                       ),
                     ),
                   ),
@@ -390,6 +392,8 @@ class _ServiceRequestFormState extends State<ServiceRequestForm> {
                             ),
                           ),
                         ),
+                        validator: (_) =>
+                            _selectedTime == null ? 'Select a time' : null,
                       ),
                     ),
                   ),
@@ -434,7 +438,7 @@ class _ServiceRequestFormState extends State<ServiceRequestForm> {
             ),
             SizedBox(height: 20),
             Text(
-              'Additional Notes',
+              'Additional Notes (optional)',
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
             SizedBox(height: 8),

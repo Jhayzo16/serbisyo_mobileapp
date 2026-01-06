@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/pages/service_category_page.dart';
 import 'package:serbisyo_mobileapp/models/cleaning_services/cleaning_services_data.dart';
+import 'package:serbisyo_mobileapp/models/car_repair_services/car_repair_services_data.dart';
+import 'package:serbisyo_mobileapp/models/delivery_services/delivery_services_data.dart';
 import 'package:serbisyo_mobileapp/models/plumbing_services/plumbing_services_data.dart';
 import 'package:serbisyo_mobileapp/models/quick_errand_services/quick_errand_services_data.dart';
 import 'package:serbisyo_mobileapp/widgets/app_elevated_card.dart';
@@ -47,6 +49,26 @@ class HomeWidgetCategory extends StatelessWidget {
               builder: (_) => const ServiceCategoryPage(
                 title: 'Quick Errand Services',
                 services: quickErrandServices,
+              ),
+            ),
+          );
+        },
+        'Car Repair' => () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const ServiceCategoryPage(
+                title: 'Car Repair Services',
+                services: carRepairServices,
+              ),
+            ),
+          );
+        },
+        'Delivery' => () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const ServiceCategoryPage(
+                title: 'Delivery Services',
+                services: deliveryServices,
               ),
             ),
           );

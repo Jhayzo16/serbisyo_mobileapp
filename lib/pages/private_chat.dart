@@ -19,9 +19,54 @@ class _PrivateChatState extends State<PrivateChat> {
   static const _theirBubbleColor = Color(0xffE9E9E9);
   static const _inputFill = Color(0xffE9E9E9);
 
+  static final Map<String, Future<_PeerInfo>> _peerInfoCache =
+      <String, Future<_PeerInfo>>{};
+
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   final _chat = ChatService();
+
+  static const Duration _timeBreakThreshold = Duration(minutes: 5);
+
+  String _formatTime(DateTime dt) {
+    return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
+  Future<_PeerInfo> _resolvePeerInfo({required String peerId}) {
+    final key = peerId.trim();
+    if (key.isEmpty) {
+      return Future.value(const _PeerInfo(name: 'Chat', photoUrl: ''));
+    }
+
+    return _peerInfoCache.putIfAbsent(key, () async {
+      Future<_PeerInfo?> fromCollection(String collection) async {
+        final snap = await FirebaseFirestore.instance
+            .collection(collection)
+            .doc(key)
+            .get();
+        final data = snap.data();
+        if (data == null) return null;
+
+        final first = (data['firstName'] ?? '').toString().trim();
+        final last = (data['lastName'] ?? '').toString().trim();
+        final full = [first, last].where((s) => s.isNotEmpty).join(' ');
+        final photoUrl = (data['photoUrl'] ?? '').toString().trim();
+
+        return _PeerInfo(
+          name: full.isNotEmpty ? full : 'Chat',
+          photoUrl: photoUrl,
+        );
+      }
+
+      try {
+        return await fromCollection('users') ??
+            await fromCollection('providers') ??
+            const _PeerInfo(name: 'Chat', photoUrl: '');
+      } catch (_) {
+        return const _PeerInfo(name: 'Chat', photoUrl: '');
+      }
+    });
+  }
 
   Future<String> _resolvePeerName({required String peerId}) async {
     final current = widget.thread.name.trim();
@@ -90,6 +135,8 @@ class _PrivateChatState extends State<PrivateChat> {
     BuildContext context, {
     required String text,
     required bool isMe,
+    required String timeLabel,
+    required bool showTime,
   }) {
     final maxWidth = MediaQuery.sizeOf(context).width * 0.72;
 
@@ -97,20 +144,40 @@ class _PrivateChatState extends State<PrivateChat> {
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: isMe ? _theirBubbleColor : _myBubbleColor,
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: isMe ? _titleColor : Colors.white,
-            ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment:
+                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isMe ? _theirBubbleColor : _myBubbleColor,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: isMe ? _titleColor : Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              if (showTime)
+                Text(
+                  timeLabel,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: _titleColor.withValues(alpha: 0.55),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -155,17 +222,41 @@ class _PrivateChatState extends State<PrivateChat> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: FutureBuilder<String>(
-          future: _resolvePeerName(peerId: peerId),
+        title: FutureBuilder<_PeerInfo>(
+          future: _resolvePeerInfo(peerId: peerId),
           builder: (context, snap) {
-            final name = (snap.data ?? widget.thread.name).trim();
-            return Text(
-              name.isNotEmpty ? name : 'Chat',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: _titleColor,
-              ),
+            final info = snap.data;
+            final fallbackName = widget.thread.name.trim().isNotEmpty
+                ? widget.thread.name.trim()
+                : 'Chat';
+            final name = (info?.name ?? fallbackName).trim();
+            final photoUrl = (info?.photoUrl ?? '').trim();
+
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage:
+                      const AssetImage('assets/icons/profile_icon.png'),
+                  foregroundImage:
+                      photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+                  backgroundColor: Colors.grey.shade200,
+                ),
+                const SizedBox(width: 10),
+                Flexible(
+                  child: Text(
+                    name.isNotEmpty ? name : 'Chat',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: _titleColor,
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         ),
@@ -208,7 +299,35 @@ class _PrivateChatState extends State<PrivateChat> {
                       final text = (data['text'] ?? '').toString();
                       final senderId = (data['senderId'] ?? '').toString();
                       final isMe = senderId == me;
-                      return _bubble(context, text: text, isMe: isMe);
+
+                      final ts = (data['createdAtClient'] as Timestamp?) ??
+                          (data['createdAt'] as Timestamp?);
+                      final dt = (ts ?? Timestamp.now()).toDate();
+                      final timeLabel = _formatTime(dt);
+
+                      bool showTime = true;
+                      if (index > 0) {
+                        final prevData = docs[index - 1].data();
+                        final prevSenderId = (prevData['senderId'] ?? '').toString();
+                        final prevTs = (prevData['createdAtClient'] as Timestamp?) ??
+                            (prevData['createdAt'] as Timestamp?);
+                        final prevDt = (prevTs ?? Timestamp.now()).toDate();
+
+                        final sameSender = prevSenderId.isNotEmpty && prevSenderId == senderId;
+                        final gap = dt.difference(prevDt);
+                        final hasBigGap = gap.abs() >= _timeBreakThreshold;
+
+                        // Show time only when conversation "breaks": sender changes or >= 5 min gap.
+                        showTime = !sameSender || hasBigGap;
+                      }
+
+                      return _bubble(
+                        context,
+                        text: text,
+                        isMe: isMe,
+                        timeLabel: timeLabel,
+                        showTime: showTime,
+                      );
                     },
                   );
                 },
@@ -261,6 +380,13 @@ class _PrivateChatState extends State<PrivateChat> {
       ),
     );
   }
+}
+
+class _PeerInfo {
+  final String name;
+  final String photoUrl;
+
+  const _PeerInfo({required this.name, required this.photoUrl});
 }
 
 class _ChatMessage {

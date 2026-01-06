@@ -4,6 +4,7 @@ class MessageThreadModel {
   final String timeLabel;
   final int unreadCount;
   final String avatarAssetPath;
+  final String avatarUrl;
   final String chatId;
   final String peerId;
 
@@ -13,6 +14,7 @@ class MessageThreadModel {
     required this.timeLabel,
     required this.unreadCount,
     required this.avatarAssetPath,
+    this.avatarUrl = '',
     this.chatId = '',
     this.peerId = '',
   });

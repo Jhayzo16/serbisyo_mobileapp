@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:serbisyo_mobileapp/models/profile_model.dart';
@@ -178,10 +179,12 @@ class _ProfilePageState extends State<ProfilePage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Profile photo updated')));
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update profile photo')),
+        SnackBar(
+          content: Text('Failed to update profile photo: $e'),
+        ),
       );
     } finally {
       if (mounted) setState(() => _uploadingPhoto = false);

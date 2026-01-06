@@ -148,12 +148,18 @@ class YourRequestCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundImage: AssetImage(
-                        request.provider!.avatarAssetPath,
-                      ),
-                      backgroundColor: Colors.transparent,
+                    Builder(
+                      builder: (context) {
+                        final pathOrUrl = request.provider!.avatarAssetPath;
+                        final ImageProvider avatar = pathOrUrl.startsWith('http')
+                            ? NetworkImage(pathOrUrl)
+                            : AssetImage(pathOrUrl);
+                        return CircleAvatar(
+                          radius: 20,
+                          backgroundImage: avatar,
+                          backgroundColor: Colors.transparent,
+                        );
+                      },
                     ),
                     const SizedBox(width: 10),
                     Expanded(

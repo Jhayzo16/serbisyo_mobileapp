@@ -48,6 +48,17 @@ class RequestService {
     // Pet care
     if (n.contains('pet')) return 'assets/icons/pet_icon.png';
 
+    // Car repair
+    if (n.contains('motorcycle')) return 'assets/icons/carr_repair.png';
+    if (n.contains('vulcan')) return 'assets/icons/carr_repair.png';
+    if (n.contains('tire')) return 'assets/icons/carr_repair.png';
+    if (n.contains('car') && n.contains('wash')) return 'assets/icons/carr_repair.png';
+    if (n.contains('car') && n.contains('repair')) return 'assets/icons/carr_repair.png';
+
+    // Delivery
+    if (n.contains('delivery')) return 'assets/icons/car_icon.png';
+    if (n.contains('package')) return 'assets/icons/car_icon.png';
+
     // Default
     return 'assets/icons/custom_icon.png';
   }

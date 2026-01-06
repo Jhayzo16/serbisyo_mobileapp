@@ -5,9 +5,14 @@ import 'package:serbisyo_mobileapp/pages/login_user_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    // On Android, the google-services plugin provides the native Firebase options.
+    // Passing manual options here can trigger [core/duplicate-app] when a default
+    // native app already exists (common during hot restart).
+    await Firebase.initializeApp();
+  } on FirebaseException catch (e) {
+    if (e.code != 'duplicate-app') rethrow;
+  }
   runApp(const MyApp());
 }
 

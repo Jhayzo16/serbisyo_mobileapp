@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/models/job_model.dart';
 import 'package:serbisyo_mobileapp/models/message_thread_model.dart';
 import 'package:serbisyo_mobileapp/pages/private_chat.dart';
+import 'package:serbisyo_mobileapp/pages/view_more_details.dart';
 import 'package:serbisyo_mobileapp/services/chat_service.dart';
 import 'package:serbisyo_mobileapp/widgets/job_page_widget/job_page_card.dart';
 
@@ -14,6 +15,85 @@ class JobPageWidget extends StatelessWidget {
   });
 
   final bool showCompleted;
+
+  static const _promptBlue = Color(0xff2B88C1);
+
+  Future<bool> _confirmCancelJob(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 18),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/icons/Penguin_promot_icon.png',
+                width: 90,
+                height: 90,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'Are you sure you want to cancel this job?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xff7C7979),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                      child: const Text(
+                        'No',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xff254356),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SizedBox(
+                      height: 40,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _promptBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Yes',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    return result ?? false;
+  }
 
   bool _matchesFilter(String status) {
     final normalized = status.trim();
@@ -138,9 +218,19 @@ class JobPageWidget extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: JobPageCard(
                 job: job,
-                onViewDetails: () {},
+                onViewDetails: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ViewMoreDetails(requestId: job.requestId),
+                    ),
+                  );
+                },
                 onMessage: () => _openChat(context, job: job),
-                onCancel: () => _cancelJob(context, job: job),
+                onCancel: () async {
+                  final ok = await _confirmCancelJob(context);
+                  if (!ok) return;
+                  await _cancelJob(context, job: job);
+                },
               ),
             );
           },
