@@ -15,9 +15,9 @@ class RequestService {
     FirebaseFirestore? db,
     FirebaseAuth? auth,
     StorageService? storage,
-  })  : _db = db ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance,
-        _storage = storage ?? StorageService();
+  }) : _db = db ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance,
+       _storage = storage ?? StorageService();
 
   String get _userId {
     final uid = _auth.currentUser?.uid;
@@ -41,23 +41,44 @@ class RequestService {
 
     // Quick errands
     if (n.contains('grocery')) return 'assets/icons/grocery_icon.png';
-    if (n.contains('market')) return 'assets/icons/publicmarket_errand_icon.png';
+    if (n.contains('market'))
+      return 'assets/icons/publicmarket_errand_icon.png';
     if (n.contains('bill')) return 'assets/icons/billpayment_icon.png';
     if (n.contains('errand')) return 'assets/icons/errand_icon.png';
 
     // Pet care
     if (n.contains('pet')) return 'assets/icons/pet_icon.png';
 
+    // Beauty & wellness
+    if (n.contains('haircut')) return 'assets/icons/Beauty.png';
+    if (n.contains('nail')) return 'assets/icons/Beauty.png';
+    if (n.contains('massage')) return 'assets/icons/Beauty.png';
+
+    // Airconditioning
+    if (n.contains('aircon')) return 'assets/icons/Aircon.png';
+    if (n.contains('air') && n.contains('conditioning')) {
+      return 'assets/icons/Aircon.png';
+    }
+
     // Car repair
     if (n.contains('motorcycle')) return 'assets/icons/carr_repair.png';
     if (n.contains('vulcan')) return 'assets/icons/carr_repair.png';
     if (n.contains('tire')) return 'assets/icons/carr_repair.png';
-    if (n.contains('car') && n.contains('wash')) return 'assets/icons/carr_repair.png';
-    if (n.contains('car') && n.contains('repair')) return 'assets/icons/carr_repair.png';
+    if (n.contains('car') && n.contains('wash'))
+      return 'assets/icons/carr_repair.png';
+    if (n.contains('car') && n.contains('repair'))
+      return 'assets/icons/carr_repair.png';
 
     // Delivery
     if (n.contains('delivery')) return 'assets/icons/car_icon.png';
     if (n.contains('package')) return 'assets/icons/car_icon.png';
+
+    // Construction & labor
+    if (n.contains('carpentry')) return 'assets/icons/Construction.png';
+    if (n.contains('masonry')) return 'assets/icons/Construction.png';
+    if (n.contains('painting')) return 'assets/icons/Construction.png';
+    if (n.contains('roof')) return 'assets/icons/Construction.png';
+    if (n.contains('welding')) return 'assets/icons/Construction.png';
 
     // Default
     return 'assets/icons/custom_icon.png';

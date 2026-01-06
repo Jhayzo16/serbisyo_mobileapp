@@ -11,21 +11,63 @@ class ProviderPageWidget extends StatelessWidget {
 
   static const _mutedText = Color(0xff7C7979);
 
-  Future<void> _acceptRequest(BuildContext context, {required String requestId}) async {
+  Future<void> _acceptRequest(
+    BuildContext context, {
+    required String requestId,
+  }) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
     try {
-      await FirebaseFirestore.instance.collection('requests').doc(requestId).set({
-        'status': 'inProgress',
-        'providerId': uid,
-        'acceptedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      final db = FirebaseFirestore.instance;
+      final reqRef = db.collection('requests').doc(requestId);
+      final notifRef = db.collection('notifications').doc();
+
+      await db.runTransaction((tx) async {
+        final snap = await tx.get(reqRef);
+        final data = snap.data() as Map<String, dynamic>?;
+        final userId = (data?['userId'] ?? '').toString().trim();
+
+        tx.set(reqRef, {
+          'status': 'inProgress',
+          'providerId': uid,
+          'acceptedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+
+        if (userId.isEmpty) return;
+
+        String serviceName = '';
+        final service = data?['service'];
+        if (service is Map) {
+          serviceName = (service['name'] ?? '').toString().trim();
+        }
+        if (serviceName.isEmpty) {
+          serviceName = (data?['title'] ?? data?['type'] ?? '')
+              .toString()
+              .trim();
+        }
+
+        final body = serviceName.isNotEmpty
+            ? 'Your request for $serviceName has been accepted!'
+            : 'Your request has been accepted!';
+
+        tx.set(notifRef, {
+          'recipientId': userId,
+          'senderId': uid,
+          'type': 'requestAccepted',
+          'title': 'Serbisyo',
+          'body': body,
+          'requestId': requestId,
+          'read': false,
+          'createdAt': FieldValue.serverTimestamp(),
+          'createdAtClient': Timestamp.now(),
+        });
+      });
     } catch (_) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to accept request')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to accept request')));
     }
   }
 
@@ -57,9 +99,7 @@ class ProviderPageWidget extends StatelessWidget {
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 final docs = snapshot.data?.docs ?? const [];
@@ -91,6 +131,7 @@ class ProviderPageWidget extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (_) => ViewMoreDetails(
                                 requestId: request.requestId,
+                                isProviderView: true,
                               ),
                             ),
                           );

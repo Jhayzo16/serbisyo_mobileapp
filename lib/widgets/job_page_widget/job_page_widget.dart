@@ -9,10 +9,7 @@ import 'package:serbisyo_mobileapp/services/chat_service.dart';
 import 'package:serbisyo_mobileapp/widgets/job_page_widget/job_page_card.dart';
 
 class JobPageWidget extends StatelessWidget {
-  const JobPageWidget({
-    super.key,
-    required this.showCompleted,
-  });
+  const JobPageWidget({super.key, required this.showCompleted});
 
   final bool showCompleted;
 
@@ -23,7 +20,9 @@ class JobPageWidget extends StatelessWidget {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 18),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -114,7 +113,9 @@ class JobPageWidget extends StatelessWidget {
     chat.ensureChat(chatId: chatId, participantIds: [me, peerId]);
 
     final thread = MessageThreadModel(
-      name: job.customerName.trim().isNotEmpty ? job.customerName.trim() : 'Customer',
+      name: job.customerName.trim().isNotEmpty
+          ? job.customerName.trim()
+          : 'Customer',
       messagePreview: '',
       timeLabel: '',
       unreadCount: 0,
@@ -123,9 +124,9 @@ class JobPageWidget extends StatelessWidget {
       peerId: peerId,
     );
 
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => PrivateChat(thread: thread)),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => PrivateChat(thread: thread)));
   }
 
   Future<void> _cancelJob(BuildContext context, {required JobModel job}) async {
@@ -133,18 +134,21 @@ class JobPageWidget extends StatelessWidget {
     if (me == null) return;
 
     try {
-      await FirebaseFirestore.instance.collection('requests').doc(job.requestId).set({
-        'status': 'pending',
-        'providerId': FieldValue.delete(),
-        'acceptedAt': FieldValue.delete(),
-        'cancelledAt': FieldValue.serverTimestamp(),
-        'cancelledBy': me,
-      }, SetOptions(merge: true));
+      await FirebaseFirestore.instance
+          .collection('requests')
+          .doc(job.requestId)
+          .set({
+            'status': 'pending',
+            'providerId': FieldValue.delete(),
+            'acceptedAt': FieldValue.delete(),
+            'cancelledAt': FieldValue.serverTimestamp(),
+            'cancelledBy': me,
+          }, SetOptions(merge: true));
     } catch (_) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to cancel job')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to cancel job')));
     }
   }
 
@@ -189,11 +193,15 @@ class JobPageWidget extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final jobs = snapshot.data!.docs
-            .map((doc) => JobModel.fromDoc(requestId: doc.id, data: doc.data()))
-            .where((job) => _matchesFilter(job.status))
-            .toList()
-          ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
+        final jobs =
+            snapshot.data!.docs
+                .map(
+                  (doc) =>
+                      JobModel.fromDoc(requestId: doc.id, data: doc.data()),
+                )
+                .where((job) => _matchesFilter(job.status))
+                .toList()
+              ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
 
         if (jobs.isEmpty) {
           return Center(
@@ -209,7 +217,12 @@ class JobPageWidget extends StatelessWidget {
         }
 
         return ListView.separated(
-          padding: const EdgeInsets.only(left: 30, right: 30, top: 14, bottom: 24),
+          padding: const EdgeInsets.only(
+            left: 30,
+            right: 30,
+            top: 14,
+            bottom: 24,
+          ),
           itemCount: jobs.length,
           separatorBuilder: (context, index) => const SizedBox(height: 14),
           itemBuilder: (context, index) {
@@ -221,7 +234,10 @@ class JobPageWidget extends StatelessWidget {
                 onViewDetails: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => ViewMoreDetails(requestId: job.requestId),
+                      builder: (_) => ViewMoreDetails(
+                        requestId: job.requestId,
+                        isProviderView: true,
+                      ),
                     ),
                   );
                 },

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:serbisyo_mobileapp/pages/chat_page.dart';
 import 'package:serbisyo_mobileapp/pages/home_page.dart';
+import 'package:serbisyo_mobileapp/pages/notification_page.dart';
 import 'package:serbisyo_mobileapp/pages/profile_page.dart';
 import 'package:serbisyo_mobileapp/pages/view_more_details.dart';
 import 'package:serbisyo_mobileapp/models/your_request_model.dart';
@@ -36,7 +37,9 @@ class _YourRequestPageState extends State<YourRequestPage> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 18),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -108,7 +111,10 @@ class _YourRequestPageState extends State<YourRequestPage> {
     return result ?? false;
   }
 
-  Future<void> _cancelUserRequest(BuildContext context, {required String requestId}) async {
+  Future<void> _cancelUserRequest(
+    BuildContext context, {
+    required String requestId,
+  }) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
 
@@ -174,12 +180,15 @@ class _YourRequestPageState extends State<YourRequestPage> {
           final providerSnap = await providerRef.get();
           if (providerSnap.exists) {
             final providerData = providerSnap.data() ?? <String, dynamic>{};
-            final currentRating = (providerData['rating'] as num?)?.toDouble() ?? 0.0;
-            final currentCount = (providerData['reviewCount'] as num?)?.toInt() ??
+            final currentRating =
+                (providerData['rating'] as num?)?.toDouble() ?? 0.0;
+            final currentCount =
+                (providerData['reviewCount'] as num?)?.toInt() ??
                 (providerData['reviews'] as num?)?.toInt() ??
                 0;
             final nextCount = currentCount + 1;
-            final nextRating = ((currentRating * currentCount) + rating) / nextCount;
+            final nextRating =
+                ((currentRating * currentCount) + rating) / nextCount;
             await providerRef.set({
               'rating': nextRating,
               'reviewCount': nextCount,
@@ -232,7 +241,9 @@ class _YourRequestPageState extends State<YourRequestPage> {
               return IconButton(
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
-                onPressed: isSubmitting ? null : () => setState(() => selectedRating = index),
+                onPressed: isSubmitting
+                    ? null
+                    : () => setState(() => selectedRating = index),
                 icon: Icon(
                   filled ? Icons.star : Icons.star_border,
                   color: const Color(0xffF2C94C),
@@ -282,7 +293,9 @@ class _YourRequestPageState extends State<YourRequestPage> {
               ),
               actions: [
                 TextButton(
-                  onPressed: isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+                  onPressed: isSubmitting
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
@@ -307,7 +320,8 @@ class _YourRequestPageState extends State<YourRequestPage> {
 
   RequestStatus _parseStatus(Object? raw) {
     final v = (raw ?? 'pending').toString().toLowerCase();
-    if (v == 'inprogress' || v == 'in_progress') return RequestStatus.inProgress;
+    if (v == 'inprogress' || v == 'in_progress')
+      return RequestStatus.inProgress;
     if (v == 'completed' || v == 'done') return RequestStatus.completed;
     return RequestStatus.pending;
   }
@@ -354,17 +368,23 @@ class _YourRequestPageState extends State<YourRequestPage> {
     String name;
     final firstName = (map['firstName'] ?? '').toString();
     final lastName = (map['lastName'] ?? '').toString();
-    final combined = [firstName.trim(), lastName.trim()]
-        .where((s) => s.isNotEmpty)
-        .join(' ');
+    final combined = [
+      firstName.trim(),
+      lastName.trim(),
+    ].where((s) => s.isNotEmpty).join(' ');
     name = combined.isNotEmpty ? combined : (map['name'] ?? '').toString();
     if (name.trim().isEmpty) name = 'Provider';
 
-    final photoUrl = (map['photoUrl'] ?? map['avatarUrl'] ?? '').toString().trim();
-    final avatar = photoUrl.isNotEmpty ? photoUrl : 'assets/icons/profile_icon.png';
+    final photoUrl = (map['photoUrl'] ?? map['avatarUrl'] ?? '')
+        .toString()
+        .trim();
+    final avatar = photoUrl.isNotEmpty
+        ? photoUrl
+        : 'assets/icons/profile_icon.png';
 
     final rating = (map['rating'] as num?)?.toDouble() ?? 0.0;
-    final reviewCount = (map['reviewCount'] as num?)?.toInt() ??
+    final reviewCount =
+        (map['reviewCount'] as num?)?.toInt() ??
         (map['reviews'] as num?)?.toInt() ??
         0;
 
@@ -386,16 +406,20 @@ class _YourRequestPageState extends State<YourRequestPage> {
 
     final firstName = (data['firstName'] ?? '').toString();
     final lastName = (data['lastName'] ?? '').toString();
-    final combined = [firstName.trim(), lastName.trim()]
-        .where((s) => s.isNotEmpty)
-        .join(' ');
+    final combined = [
+      firstName.trim(),
+      lastName.trim(),
+    ].where((s) => s.isNotEmpty).join(' ');
     final name = combined.isNotEmpty ? combined : 'Provider';
 
     final photoUrl = (data['photoUrl'] ?? '').toString().trim();
-    final avatar = photoUrl.isNotEmpty ? photoUrl : 'assets/icons/profile_icon.png';
+    final avatar = photoUrl.isNotEmpty
+        ? photoUrl
+        : 'assets/icons/profile_icon.png';
 
     final rating = (data['rating'] as num?)?.toDouble() ?? 0.0;
-    final reviewCount = (data['reviewCount'] as num?)?.toInt() ??
+    final reviewCount =
+        (data['reviewCount'] as num?)?.toInt() ??
         (data['reviews'] as num?)?.toInt() ??
         0;
 
@@ -407,7 +431,10 @@ class _YourRequestPageState extends State<YourRequestPage> {
     );
   }
 
-  YourRequestModel _toRequestModel({required String requestId, required Map<String, dynamic> data}) {
+  YourRequestModel _toRequestModel({
+    required String requestId,
+    required Map<String, dynamic> data,
+  }) {
     final type = (data['type'] ?? 'service').toString();
 
     final iconFromDb = data['iconAssetPath'];
@@ -429,9 +456,13 @@ class _YourRequestPageState extends State<YourRequestPage> {
 
     final status = _parseStatus(data['status']);
     final scheduledAt = _scheduledAtFrom(data);
-    final location = data['location'] is String ? data['location'] as String : null;
+    final location = data['location'] is String
+        ? data['location'] as String
+        : null;
 
-    final providerId = data['providerId'] is String ? data['providerId'] as String : null;
+    final providerId = data['providerId'] is String
+        ? data['providerId'] as String
+        : null;
     final provider = _providerFromEmbedded(data['provider']);
 
     return YourRequestModel(
@@ -453,7 +484,7 @@ class _YourRequestPageState extends State<YourRequestPage> {
     final uid = _auth.currentUser?.uid;
 
     return Scaffold(
-      appBar: appBar(),
+      appBar: appBar(context),
       bottomNavigationBar: botToolBar(context),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -479,19 +510,29 @@ class _YourRequestPageState extends State<YourRequestPage> {
                       final docs = snapshot.data?.docs ?? const [];
                       final all = docs
                           .where((d) => !_isCancelledStatus(d.data()['status']))
-                          .map((d) => _toRequestModel(requestId: d.id, data: d.data()))
+                          .map(
+                            (d) => _toRequestModel(
+                              requestId: d.id,
+                              data: d.data(),
+                            ),
+                          )
                           .toList(growable: false);
 
                       final requests = switch (_selectedTabIndex) {
-                        0 => all
-                            .where((r) => r.status == RequestStatus.pending)
-                            .toList(growable: false),
-                        1 => all
-                            .where((r) => r.status == RequestStatus.inProgress)
-                            .toList(growable: false),
-                        _ => all
-                            .where((r) => r.status == RequestStatus.completed)
-                            .toList(growable: false),
+                        0 =>
+                          all
+                              .where((r) => r.status == RequestStatus.pending)
+                              .toList(growable: false),
+                        1 =>
+                          all
+                              .where(
+                                (r) => r.status == RequestStatus.inProgress,
+                              )
+                              .toList(growable: false),
+                        _ =>
+                          all
+                              .where((r) => r.status == RequestStatus.completed)
+                              .toList(growable: false),
                       };
 
                       if (requests.isEmpty) {
@@ -532,14 +573,18 @@ class _YourRequestPageState extends State<YourRequestPage> {
 
                           return SlideTransition(
                             position: position,
-                            child: FadeTransition(opacity: animation, child: child),
+                            child: FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            ),
                           );
                         },
                         child: ListView.separated(
                           key: ValueKey<int>(_selectedTabIndex),
                           padding: const EdgeInsets.only(bottom: 24),
                           itemCount: requests.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 14),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 14),
                           itemBuilder: (context, index) {
                             final request = requests[index];
 
@@ -547,12 +592,15 @@ class _YourRequestPageState extends State<YourRequestPage> {
                               final providerId = (r.providerId ?? '').trim();
                               if (providerId.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Provider not found')),
+                                  const SnackBar(
+                                    content: Text('Provider not found'),
+                                  ),
                                 );
                                 return;
                               }
 
-                              final providerName = r.provider?.name ?? 'Provider';
+                              final providerName =
+                                  r.provider?.name ?? 'Provider';
 
                               _showRateProviderDialog(
                                 context: context,
@@ -562,24 +610,38 @@ class _YourRequestPageState extends State<YourRequestPage> {
                               );
                             }
 
-                            if (request.provider != null || request.providerId == null) {
+                            if (request.provider != null ||
+                                request.providerId == null) {
                               return YourRequestCard(
                                 request: request,
                                 onViewDetails: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (_) => ViewMoreDetails(requestId: request.id),
+                                      builder: (_) => ViewMoreDetails(
+                                        requestId: request.id,
+                                      ),
                                     ),
                                   );
                                 },
-                                onCancel: request.status == RequestStatus.pending
-                                    ? () => _cancelUserRequest(context, requestId: request.id)
+                                onCancel:
+                                    request.status == RequestStatus.pending
+                                    ? () => _cancelUserRequest(
+                                        context,
+                                        requestId: request.id,
+                                      )
                                     : () {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Request is already in progress')),
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Request is already in progress',
+                                            ),
+                                          ),
                                         );
                                       },
-                                onRateProvider: () => onRateProviderFor(request),
+                                onRateProvider: () =>
+                                    onRateProviderFor(request),
                                 onBookAgain: () {},
                               );
                             }
@@ -596,18 +658,31 @@ class _YourRequestPageState extends State<YourRequestPage> {
                                   onViewDetails: () {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (_) => ViewMoreDetails(requestId: resolved.id),
+                                        builder: (_) => ViewMoreDetails(
+                                          requestId: resolved.id,
+                                        ),
                                       ),
                                     );
                                   },
-                                  onCancel: resolved.status == RequestStatus.pending
-                                      ? () => _cancelUserRequest(context, requestId: resolved.id)
+                                  onCancel:
+                                      resolved.status == RequestStatus.pending
+                                      ? () => _cancelUserRequest(
+                                          context,
+                                          requestId: resolved.id,
+                                        )
                                       : () {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Request is already in progress')),
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Request is already in progress',
+                                              ),
+                                            ),
                                           );
                                         },
-                                  onRateProvider: () => onRateProviderFor(resolved),
+                                  onRateProvider: () =>
+                                      onRateProviderFor(resolved),
                                   onBookAgain: () {},
                                 );
                               },
@@ -702,30 +777,45 @@ class _YourRequestPageState extends State<YourRequestPage> {
           ),
 
           // Profile
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const ProfilePage()),
-                );
-              },
-              child: ImageIcon(
-                const AssetImage('assets/icons/profile_icon.png'),
-                color: _unselectedColor,
-                size: 26,
-              ),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const ProfilePage()),
+              );
+            },
+            child: ImageIcon(
+              const AssetImage('assets/icons/profile_icon.png'),
+              color: _unselectedColor,
+              size: 26,
             ),
+          ),
         ],
       ),
     );
   }
 
-  AppBar appBar() {
+  AppBar appBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       actions: [
         Container(
           margin: EdgeInsets.only(top: 50, right: 20),
-          child: Icon(size: 40, color: Colors.black, Icons.notifications),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const NotificationPage(isProvider: false),
+                ),
+              );
+            },
+            icon: const Icon(
+              size: 40,
+              color: Colors.black,
+              Icons.notifications,
+            ),
+          ),
         ),
       ],
       toolbarHeight: 100,

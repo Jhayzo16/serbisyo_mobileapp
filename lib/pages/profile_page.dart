@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:serbisyo_mobileapp/pages/notification_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:serbisyo_mobileapp/models/profile_model.dart';
 import 'package:serbisyo_mobileapp/pages/chat_page.dart';
@@ -182,9 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update profile photo: $e'),
-        ),
+        SnackBar(content: Text('Failed to update profile photo: $e')),
       );
     } finally {
       if (mounted) setState(() => _uploadingPhoto = false);
@@ -400,7 +399,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  AppBar _appBar() {
+  AppBar _appBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       toolbarHeight: 100,
@@ -418,7 +417,23 @@ class _ProfilePageState extends State<ProfilePage> {
       actions: [
         Container(
           margin: const EdgeInsets.only(top: 50, right: 20),
-          child: const Icon(size: 40, color: Colors.black, Icons.notifications),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      NotificationPage(isProvider: widget.isProvider),
+                ),
+              );
+            },
+            icon: const Icon(
+              size: 40,
+              color: Colors.black,
+              Icons.notifications,
+            ),
+          ),
         ),
       ],
     );
@@ -430,7 +445,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final profile = _profile;
 
     return Scaffold(
-      appBar: _appBar(),
+      appBar: _appBar(context),
       bottomNavigationBar: _navToolbar(context),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

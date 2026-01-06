@@ -5,23 +5,29 @@ import 'package:serbisyo_mobileapp/widgets/app_elevated_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ViewDetailsWidget extends StatelessWidget {
-  const ViewDetailsWidget({super.key, required this.requestId});
+  const ViewDetailsWidget({
+    super.key,
+    required this.requestId,
+    this.isProviderView = false,
+  });
 
   final String requestId;
+  final bool isProviderView;
 
   static const _primaryColor = Color(0xff254356);
   static const _mutedText = Color(0xff7C7979);
   static const _borderColor = Color(0xffD1D5DB);
   static const _actionBlue = Color(0xff2B88C1);
 
-  Future<void> _setPaidStatus(BuildContext context, {required bool isPaid}) async {
+  Future<void> _setPaidStatus(
+    BuildContext context, {
+    required bool isPaid,
+  }) async {
     final me = FirebaseAuth.instance.currentUser?.uid;
     if (me == null) return;
 
     try {
-      final update = <String, Object?>{
-        'isPaid': isPaid,
-      };
+      final update = <String, Object?>{'isPaid': isPaid};
 
       if (isPaid) {
         update['paidAt'] = FieldValue.serverTimestamp();
@@ -43,10 +49,15 @@ class ViewDetailsWidget extends StatelessWidget {
     }
   }
 
-  Future<void> _completeJob(BuildContext context, {required bool isPaid}) async {
+  Future<void> _completeJob(
+    BuildContext context, {
+    required bool isPaid,
+  }) async {
     if (!isPaid) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mark customer as paid to complete the job')),
+        const SnackBar(
+          content: Text('Mark customer as paid to complete the job'),
+        ),
       );
       return;
     }
@@ -55,21 +66,24 @@ class ViewDetailsWidget extends StatelessWidget {
     if (me == null) return;
 
     try {
-      await FirebaseFirestore.instance.collection('requests').doc(requestId).set({
-        'status': 'completed',
-        'completedAt': FieldValue.serverTimestamp(),
-        'completedBy': me,
-      }, SetOptions(merge: true));
+      await FirebaseFirestore.instance
+          .collection('requests')
+          .doc(requestId)
+          .set({
+            'status': 'completed',
+            'completedAt': FieldValue.serverTimestamp(),
+            'completedBy': me,
+          }, SetOptions(merge: true));
 
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Job marked as completed')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Job marked as completed')));
     } catch (_) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to complete job')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to complete job')));
     }
   }
 
@@ -167,13 +181,19 @@ class ViewDetailsWidget extends StatelessWidget {
   List<String> _imageUrlsFrom(Map<String, dynamic> data) {
     final fromImageUrls = data['imageUrls'];
     if (fromImageUrls is List) {
-      return fromImageUrls.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
+      return fromImageUrls
+          .map((e) => e.toString())
+          .where((e) => e.trim().isNotEmpty)
+          .toList();
     }
 
     // Custom requests in older code might keep images under 'images'
     final fromImages = data['images'];
     if (fromImages is List) {
-      return fromImages.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
+      return fromImages
+          .map((e) => e.toString())
+          .where((e) => e.trim().isNotEmpty)
+          .toList();
     }
     return const [];
   }
@@ -225,7 +245,10 @@ class ViewDetailsWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _openMaps(BuildContext context, {required String location}) async {
+  Future<void> _openMaps(
+    BuildContext context, {
+    required String location,
+  }) async {
     final query = location.trim();
     if (query.isEmpty) return;
 
@@ -244,15 +267,15 @@ class ViewDetailsWidget extends StatelessWidget {
     try {
       final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!ok && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to open maps')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Unable to open maps')));
       }
     } catch (_) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to open maps')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Unable to open maps')));
     }
   }
 
@@ -303,7 +326,10 @@ class ViewDetailsWidget extends StatelessWidget {
       );
     }
 
-    final stream = FirebaseFirestore.instance.collection('users').doc(userId).snapshots();
+    final stream = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .snapshots();
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: stream,
       builder: (context, snap) {
@@ -325,8 +351,12 @@ class ViewDetailsWidget extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 26,
-                    backgroundImage: const AssetImage('assets/icons/profile_icon.png'),
-                    foregroundImage: photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+                    backgroundImage: const AssetImage(
+                      'assets/icons/profile_icon.png',
+                    ),
+                    foregroundImage: photoUrl.isNotEmpty
+                        ? NetworkImage(photoUrl)
+                        : null,
                     backgroundColor: Colors.grey.shade200,
                   ),
                   const SizedBox(width: 12),
@@ -371,7 +401,10 @@ class ViewDetailsWidget extends StatelessWidget {
       );
     }
 
-    final stream = FirebaseFirestore.instance.collection('providers').doc(providerId).snapshots();
+    final stream = FirebaseFirestore.instance
+        .collection('providers')
+        .doc(providerId)
+        .snapshots();
     return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       stream: stream,
       builder: (context, snap) {
@@ -393,8 +426,12 @@ class ViewDetailsWidget extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 26,
-                    backgroundImage: const AssetImage('assets/icons/profile_icon.png'),
-                    foregroundImage: photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
+                    backgroundImage: const AssetImage(
+                      'assets/icons/profile_icon.png',
+                    ),
+                    foregroundImage: photoUrl.isNotEmpty
+                        ? NetworkImage(photoUrl)
+                        : null,
                     backgroundColor: Colors.grey.shade200,
                   ),
                   const SizedBox(width: 12),
@@ -426,7 +463,10 @@ class ViewDetailsWidget extends StatelessWidget {
     );
   }
 
-  Widget _requestDetailsSection(BuildContext context, {required Map<String, dynamic> data}) {
+  Widget _requestDetailsSection(
+    BuildContext context, {
+    required Map<String, dynamic> data,
+  }) {
     final title = _titleFrom(data).trim();
     final status = (data['status'] ?? '').toString().trim();
     final location = (data['location'] ?? '').toString().trim();
@@ -438,11 +478,18 @@ class ViewDetailsWidget extends StatelessWidget {
     final budget = (data['budget'] ?? '').toString().trim();
 
     final service = data['service'];
-    final serviceDesc = (service is Map) ? (service['description'] ?? '').toString().trim() : '';
-    final servicePrice = (service is Map) ? (service['price'] ?? '').toString().trim() : '';
-    final serviceDuration = (service is Map) ? (service['duration'] ?? '').toString().trim() : '';
+    final serviceDesc = (service is Map)
+        ? (service['description'] ?? '').toString().trim()
+        : '';
+    final servicePrice = (service is Map)
+        ? (service['price'] ?? '').toString().trim()
+        : '';
+    final serviceDuration = (service is Map)
+        ? (service['duration'] ?? '').toString().trim()
+        : '';
 
-    final iconAssetPath = (data['iconAssetPath'] ?? 'assets/icons/custom_icon.png').toString();
+    final iconAssetPath =
+        (data['iconAssetPath'] ?? 'assets/icons/custom_icon.png').toString();
 
     return _card(
       child: Column(
@@ -452,11 +499,7 @@ class ViewDetailsWidget extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ImageIcon(
-                AssetImage(iconAssetPath),
-                size: 22,
-                color: _mutedText,
-              ),
+              ImageIcon(AssetImage(iconAssetPath), size: 22, color: _mutedText),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -475,7 +518,10 @@ class ViewDetailsWidget extends StatelessWidget {
           const SizedBox(height: 12),
           if (status.isNotEmpty)
             _infoRow(icon: Icons.info_outline, text: 'Status: $status'),
-          _infoRow(icon: Icons.calendar_month_outlined, text: _formatDateTime(scheduledAt)),
+          _infoRow(
+            icon: Icons.calendar_month_outlined,
+            text: _formatDateTime(scheduledAt),
+          ),
           if (location.isNotEmpty)
             _infoRow(icon: Icons.location_on_outlined, text: location),
           if (status == 'inProgress' && location.isNotEmpty) ...[
@@ -490,9 +536,15 @@ class ViewDetailsWidget extends StatelessWidget {
           if (type == 'custom' && budget.isNotEmpty)
             _infoRow(icon: Icons.payments_outlined, text: 'Budget: $budget'),
           if (type == 'service' && serviceDuration.isNotEmpty)
-            _infoRow(icon: Icons.access_time_outlined, text: 'Duration: $serviceDuration'),
+            _infoRow(
+              icon: Icons.access_time_outlined,
+              text: 'Duration: $serviceDuration',
+            ),
           if (type == 'service' && servicePrice.isNotEmpty)
-            _infoRow(icon: Icons.payments_outlined, text: 'Price: $servicePrice'),
+            _infoRow(
+              icon: Icons.payments_outlined,
+              text: 'Price: $servicePrice',
+            ),
           if (type == 'service' && serviceDesc.isNotEmpty)
             _infoRow(icon: Icons.description_outlined, text: serviceDesc),
         ],
@@ -528,7 +580,10 @@ class ViewDetailsWidget extends StatelessWidget {
                         return Container(
                           color: Colors.grey.shade200,
                           alignment: Alignment.center,
-                          child: const Icon(Icons.broken_image_outlined, color: _mutedText),
+                          child: const Icon(
+                            Icons.broken_image_outlined,
+                            color: _mutedText,
+                          ),
                         );
                       },
                       loadingBuilder: (context, child, progress) {
@@ -558,10 +613,7 @@ class ViewDetailsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (requestId.trim().isEmpty) {
       return const Center(
-        child: Text(
-          'Request not found.',
-          style: TextStyle(color: _mutedText),
-        ),
+        child: Text('Request not found.', style: TextStyle(color: _mutedText)),
       );
     }
 
@@ -602,7 +654,11 @@ class ViewDetailsWidget extends StatelessWidget {
         final status = (data['status'] ?? '').toString().trim();
         final providerIdTrimmed = providerId.trim();
         final me = FirebaseAuth.instance.currentUser?.uid;
-        final isProviderViewer = me != null && providerIdTrimmed.isNotEmpty && me == providerIdTrimmed;
+        final isProviderViewer =
+            me != null &&
+            providerIdTrimmed.isNotEmpty &&
+            me == providerIdTrimmed;
+        final showCustomerSection = isProviderView || isProviderViewer;
         final canComplete = status == 'inProgress' && isProviderViewer;
         final isPaid = data['isPaid'] == true;
         final canCompleteJob = canComplete && isPaid;
@@ -612,7 +668,7 @@ class ViewDetailsWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              isProviderViewer
+              showCustomerSection
                   ? _customerProfileSection(userId: userId)
                   : _providerProfileSection(providerId: providerIdTrimmed),
               const SizedBox(height: 14),
@@ -624,7 +680,9 @@ class ViewDetailsWidget extends StatelessWidget {
                 SizedBox(
                   height: 44,
                   child: ElevatedButton(
-                    onPressed: canCompleteJob ? () => _completeJob(context, isPaid: isPaid) : null,
+                    onPressed: canCompleteJob
+                        ? () => _completeJob(context, isPaid: isPaid)
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _actionBlue,
                       shape: RoundedRectangleBorder(

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:serbisyo_mobileapp/pages/login_user_page.dart';
 import 'package:serbisyo_mobileapp/services/auth_service.dart';
 import 'package:serbisyo_mobileapp/services/storage_service.dart';
 
@@ -68,9 +69,9 @@ class _SignupProviderWidgetState extends State<SignupProviderWidget> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to pick photo')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to pick photo')));
     } finally {
       if (mounted) setState(() => _isPickingPhoto = false);
     }
@@ -148,7 +149,10 @@ class _SignupProviderWidgetState extends State<SignupProviderWidget> {
       String? photoUrl;
       final picked = _photo;
       if (picked != null) {
-        final safeName = picked.name.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+        final safeName = picked.name.replaceAll(
+          RegExp(r'[^a-zA-Z0-9._-]'),
+          '_',
+        );
         final storagePath = 'providers/$uid/profile_$safeName';
         photoUrl = await _storageService.uploadXFile(
           file: picked,
@@ -170,9 +174,16 @@ class _SignupProviderWidgetState extends State<SignupProviderWidget> {
       }, SetOptions(merge: true));
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Provider signup successful')),
-      );
+      await _authService.signOut();
+      if (!mounted) return;
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop(true);
+      } else {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginUserPage()),
+          (route) => false,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       final message = switch (e) {
@@ -181,9 +192,9 @@ class _SignupProviderWidgetState extends State<SignupProviderWidget> {
         StateError _ => e.message,
         _ => 'Signup failed.',
       };
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -234,7 +245,12 @@ class _SignupProviderWidgetState extends State<SignupProviderWidget> {
                     ),
                     child: _photoBytes == null
                         ? const SizedBox.shrink()
-                        : ClipOval(child: Image.memory(_photoBytes!, fit: BoxFit.cover)),
+                        : ClipOval(
+                            child: Image.memory(
+                              _photoBytes!,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                   ),
                   if (_isPickingPhoto)
                     const Center(

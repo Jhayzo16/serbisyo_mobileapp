@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/widgets/view_more_details/view_details_widget.dart';
 
 class ViewMoreDetails extends StatelessWidget {
-  const ViewMoreDetails({super.key, required this.requestId});
+  const ViewMoreDetails({
+    super.key,
+    required this.requestId,
+    this.isProviderView = false,
+  });
 
   final String requestId;
+  final bool isProviderView;
 
   static const _titleColor = Color(0xff254356);
 
@@ -26,7 +31,10 @@ class ViewMoreDetails extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: ViewDetailsWidget(requestId: requestId),
+      body: ViewDetailsWidget(
+        requestId: requestId,
+        isProviderView: isProviderView,
+      ),
     );
   }
 }

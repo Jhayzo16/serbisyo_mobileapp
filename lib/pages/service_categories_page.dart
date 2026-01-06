@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:serbisyo_mobileapp/pages/service_categories_page.dart';
-import 'package:serbisyo_mobileapp/pages/service_category_page.dart';
-import 'package:serbisyo_mobileapp/models/cleaning_services/cleaning_services_data.dart';
+import 'package:serbisyo_mobileapp/models/airconditioning_services/airconditioning_services_data.dart';
+import 'package:serbisyo_mobileapp/models/beauty_wellness_services/beauty_wellness_services_data.dart';
 import 'package:serbisyo_mobileapp/models/car_repair_services/car_repair_services_data.dart';
+import 'package:serbisyo_mobileapp/models/cleaning_services/cleaning_services_data.dart';
+import 'package:serbisyo_mobileapp/models/construction_labor_services/construction_labor_services_data.dart';
 import 'package:serbisyo_mobileapp/models/delivery_services/delivery_services_data.dart';
 import 'package:serbisyo_mobileapp/models/pet_care_services/pet_care_services_data.dart';
 import 'package:serbisyo_mobileapp/models/plumbing_services/plumbing_services_data.dart';
 import 'package:serbisyo_mobileapp/models/quick_errand_services/quick_errand_services_data.dart';
+import 'package:serbisyo_mobileapp/pages/service_category_page.dart';
 import 'package:serbisyo_mobileapp/widgets/app_elevated_card.dart';
 
-class HomeWidgetCategory extends StatelessWidget {
-  const HomeWidgetCategory({super.key});
+class ServiceCategoriesPage extends StatelessWidget {
+  const ServiceCategoriesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +23,10 @@ class HomeWidgetCategory extends StatelessWidget {
       {'label': 'Pet Care', 'icon': 'assets/icons/pet_icon.png'},
       {'label': 'Car Repair', 'icon': 'assets/icons/carr_repair.png'},
       {'label': 'Delivery', 'icon': 'assets/icons/car_icon.png'},
+      // Only visible here (See more)
+      {'label': 'Airconditioning', 'icon': 'assets/icons/Aircon.png'},
+      {'label': 'Beauty & Wellness', 'icon': 'assets/icons/Beauty.png'},
+      {'label': 'Construction & Labor', 'icon': 'assets/icons/Construction.png'},
     ];
 
     Widget buildCategoryItem(String label, String iconAssetPath) {
@@ -81,6 +87,36 @@ class HomeWidgetCategory extends StatelessWidget {
               builder: (_) => const ServiceCategoryPage(
                 title: 'Delivery Services',
                 services: deliveryServices,
+              ),
+            ),
+          );
+        },
+        'Airconditioning' => () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const ServiceCategoryPage(
+                title: 'Airconditioning Services',
+                services: airconditioningServices,
+              ),
+            ),
+          );
+        },
+        'Beauty & Wellness' => () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const ServiceCategoryPage(
+                title: 'Beauty & Wellness Services',
+                services: beautyWellnessServices,
+              ),
+            ),
+          );
+        },
+        'Construction & Labor' => () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const ServiceCategoryPage(
+                title: 'Construction & Labor Services',
+                services: constructionLaborServices,
               ),
             ),
           );
@@ -152,55 +188,37 @@ class HomeWidgetCategory extends StatelessWidget {
       );
     }
 
-    return Container(
-      margin: EdgeInsets.only(left: 20, right: 20, top: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Services Category',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff254356),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ServiceCategoriesPage(),
-                    ),
-                  );
-                },
-                child: Text(
-                  'See more',
-                  style: TextStyle(color: Color(0xff9B9B9B), fontSize: 12),
-                ),
-              ),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Services Category',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xff254356),
           ),
-          SizedBox(height: 12),
-          GridView.count(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            crossAxisCount: 3,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 0.85,
-            children: categories
-                .map(
-                  (c) => buildCategoryItem(
-                    c['label'] as String,
-                    c['icon'] as String,
-                  ),
-                )
-                .toList(),
-          ),
-        ],
+        ),
+      ),
+      body: SafeArea(
+        child: GridView.count(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+          crossAxisCount: 3,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 0.85,
+          children: categories
+              .map(
+                (c) => buildCategoryItem(
+                  c['label'] as String,
+                  c['icon'] as String,
+                ),
+              )
+              .toList(),
+        ),
       ),
     );
   }

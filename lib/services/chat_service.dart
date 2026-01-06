@@ -17,7 +17,11 @@ class ChatService {
     required String chatId,
     required List<String> participantIds,
   }) async {
-    final ids = participantIds.map((e) => e.trim()).where((e) => e.isNotEmpty).toSet().toList();
+    final ids = participantIds
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList();
     if (chatId.trim().isEmpty || ids.length < 2) return;
 
     await _db.collection('chats').doc(chatId).set({
@@ -71,9 +75,7 @@ class ChatService {
         .toSet()
         .toList();
     if (ids.length >= 2) {
-      batch.set(doc, {
-        'participants': ids,
-      }, SetOptions(merge: true));
+      batch.set(doc, {'participants': ids}, SetOptions(merge: true));
     }
 
     batch.set(doc, {
@@ -82,6 +84,25 @@ class ChatService {
       'updatedAt': FieldValue.serverTimestamp(),
       'updatedAtClient': Timestamp.now(),
     }, SetOptions(merge: true));
+
+    // In-app notifications for recipients
+    if (ids.isNotEmpty) {
+      for (final recipientId in ids) {
+        if (recipientId == senderId) continue;
+        final notifRef = _db.collection('notifications').doc();
+        batch.set(notifRef, {
+          'recipientId': recipientId,
+          'senderId': senderId,
+          'type': 'message',
+          'title': 'Message',
+          'body': 'Someone sent you a message',
+          'chatId': chatId,
+          'read': false,
+          'createdAt': FieldValue.serverTimestamp(),
+          'createdAtClient': Timestamp.now(),
+        });
+      }
+    }
 
     return batch.commit();
   }

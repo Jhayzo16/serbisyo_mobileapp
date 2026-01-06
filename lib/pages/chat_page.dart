@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/pages/home_page.dart';
 import 'package:serbisyo_mobileapp/pages/jobs_page.dart';
+import 'package:serbisyo_mobileapp/pages/notification_page.dart';
 import 'package:serbisyo_mobileapp/pages/profile_page.dart';
 import 'package:serbisyo_mobileapp/pages/provider_homepage.dart';
 import 'package:serbisyo_mobileapp/pages/your_request_page.dart';
@@ -18,7 +19,7 @@ class ChatPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBar(),
+      appBar: appBar(context),
       bottomNavigationBar: navToolBar(context),
       body: MessagesPanel(),
     );
@@ -89,7 +90,9 @@ class ChatPage extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const ProfilePage(isProvider: true)),
+                  MaterialPageRoute(
+                    builder: (_) => const ProfilePage(isProvider: true),
+                  ),
                 );
               },
               child: ImageIcon(
@@ -180,13 +183,28 @@ class ChatPage extends StatelessWidget {
     );
   }
 
-  AppBar appBar() {
+  AppBar appBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       actions: [
         Container(
           margin: EdgeInsets.only(top: 50, right: 20),
-          child: Icon(size: 40, color: Colors.black, Icons.notifications),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => NotificationPage(isProvider: isProvider),
+                ),
+              );
+            },
+            icon: const Icon(
+              size: 40,
+              color: Colors.black,
+              Icons.notifications,
+            ),
+          ),
         ),
       ],
       toolbarHeight: 100,

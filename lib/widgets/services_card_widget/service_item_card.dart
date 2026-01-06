@@ -58,10 +58,10 @@ class ServiceItemCard extends StatelessWidget {
         borderSide: BorderSide(color: borderColor, width: selected ? 1.2 : 1.0),
         margin: const EdgeInsets.symmetric(horizontal: 40),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-        child: SizedBox(
-          width: 312,
-          height: 140,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 140),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -110,41 +110,50 @@ class ServiceItemCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  RichText(
-                    text: TextSpan(
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xff9B9B9B),
-                      ),
-                      children: [
-                        const TextSpan(
-                          text: 'Starting at ',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xff9B9B9B),
                         ),
-                        TextSpan(
-                          text: _formatPeso(service.price),
+                        children: [
+                          const TextSpan(
+                            text: 'Starting at ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          TextSpan(
+                            text: _formatPeso(service.price),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      children: [
+                        ..._buildStars(service.rating),
+                        const SizedBox(width: 6),
+                        Text(
+                          service.rating.toStringAsFixed(1),
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
+                            color: Color(0xff9B9B9B),
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  Row(
-                    children: [
-                      ..._buildStars(service.rating),
-                      const SizedBox(width: 6),
-                      Text(
-                        service.rating.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xff9B9B9B),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

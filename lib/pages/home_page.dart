@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/pages/chat_page.dart';
+import 'package:serbisyo_mobileapp/pages/notification_page.dart';
 import 'package:serbisyo_mobileapp/pages/profile_page.dart';
 import 'package:serbisyo_mobileapp/pages/your_request_page.dart';
 import 'package:serbisyo_mobileapp/widgets/home_page_widget/home_widget.dart';
@@ -15,10 +16,19 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBar(),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [HomeWidget(), HomeWidgetSearch(), HomeWidgetCategory()],
+      appBar: appBar(context),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              HomeWidget(),
+              HomeWidgetSearch(),
+              HomeWidgetCategory(),
+            ],
+          ),
+        ),
       ),
       bottomNavigationBar: Container(
         height: 86,
@@ -98,12 +108,28 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  AppBar appBar() {
+  AppBar appBar(BuildContext context) {
     return AppBar(
       actions: [
         Container(
           margin: EdgeInsets.only(top: 50, right: 20),
-          child: Icon(size: 40, color: Colors.black, Icons.notifications),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () {
+              // ignore: use_build_context_synchronously
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const NotificationPage(isProvider: false),
+                ),
+              );
+            },
+            icon: const Icon(
+              size: 40,
+              color: Colors.black,
+              Icons.notifications,
+            ),
+          ),
         ),
       ],
       toolbarHeight: 100,

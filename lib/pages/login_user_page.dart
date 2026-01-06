@@ -71,16 +71,19 @@ class _LoginUserPageState extends State<LoginUserPage> {
   }
 
   Future<void> _signUp() async {
-    if (!_isUserMode) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const SignupProvider()));
-      return;
-    }
+    final didSignUp = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) =>
+            _isUserMode ? const SignupUserPage() : const SignupProvider(),
+      ),
+    );
 
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const SignupUserPage()));
+    if (!mounted) return;
+    if (didSignUp == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Successfully signed up. Please log in.')),
+      );
+    }
   }
 
   Future<void> _forgotPassword() async {
@@ -109,45 +112,62 @@ class _LoginUserPageState extends State<LoginUserPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Container(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+      body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.12),
-                LoginUserLogoWidget(
-                  initialIsUser: _isUserMode,
-                  onChanged: (isUser) => setState(() => _isUserMode = isUser),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            children: [
+              const SizedBox(height: 36),
+              LoginUserLogoWidget(
+                initialIsUser: _isUserMode,
+                onChanged: (isUser) => setState(() => _isUserMode = isUser),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                _isUserMode ? 'Welcome back!' : 'Welcome back, Provider!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF111827),
                 ),
-                SizedBox(height: 24),
-                if ((_loginError ?? '').trim().isNotEmpty) ...[
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      _loginError!,
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Log in to continue',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF6B7280),
+                  height: 1.35,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 18),
+              if ((_loginError ?? '').trim().isNotEmpty) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _loginError!,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                ],
-                LoginUserFields(
-                  emailController: _emailController,
-                  passwordController: _passwordController,
-                  onForgotPassword: _forgotPassword,
                 ),
-                LoginUserButton(
-                  isLoading: _isLoading,
-                  onLogin: _login,
-                  onSignUp: _signUp,
-                ),
+                const SizedBox(height: 10),
               ],
-            ),
+              LoginUserFields(
+                emailController: _emailController,
+                passwordController: _passwordController,
+                onForgotPassword: _forgotPassword,
+              ),
+              const SizedBox(height: 18),
+              LoginUserButton(
+                isLoading: _isLoading,
+                onLogin: _login,
+                onSignUp: _signUp,
+              ),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),
