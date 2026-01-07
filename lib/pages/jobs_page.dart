@@ -20,10 +20,13 @@ class _JobsPageState extends State<JobsPage> {
   static const _primaryColor = Color(0xff254356);
   static const _selectedColor = Color(0xff356785);
   static const _unselectedColor = Color(0xffBFBFBF);
+  final bg = Color.lerp(Colors.white, _selectedColor, 0.12)!;
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
+      backgroundColor: bg,
       appBar: appBar(context),
       bottomNavigationBar: navToolbar(context),
       body: Column(
@@ -126,6 +129,7 @@ class _JobsPageState extends State<JobsPage> {
 
   AppBar appBar(BuildContext context) {
     return AppBar(
+      backgroundColor: bg,
       actions: [
         Container(
           margin: EdgeInsets.only(right: 20),

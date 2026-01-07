@@ -15,10 +15,12 @@ class ProviderHomepage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bg = Color.lerp(Colors.white, _selectedColor, 0.12)!;
     return Scaffold(
+      backgroundColor: bg,
       appBar: appBar(context),
       bottomNavigationBar: navToolbar(context),
-      body: ProviderPageWidget(),
+      body: const ProviderPageWidget(themeBlue: _selectedColor),
     );
   }
 
@@ -106,11 +108,15 @@ class ProviderHomepage extends StatelessWidget {
 
   AppBar appBar(BuildContext context) {
     return AppBar(
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
       actions: [
-        Container(
-          margin: EdgeInsets.only(top: 50, right: 20),
+        Padding(
+          padding: const EdgeInsets.only(right: 12),
           child: NotificationBellBadge(
-            iconSize: 40,
+            iconSize: 32,
             iconColor: Colors.black,
             onPressed: () {
               Navigator.of(context).push(
@@ -122,12 +128,14 @@ class ProviderHomepage extends StatelessWidget {
           ),
         ),
       ],
-      toolbarHeight: 100,
-      title: Container(
-        margin: EdgeInsets.only(top: 50, left: 20),
-        child: Text(
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-          'Earn Money Now!',
+      toolbarHeight: 72,
+      titleSpacing: 20,
+      title: const Text(
+        'Earn Money Now!',
+        style: TextStyle(
+          fontWeight: FontWeight.w800,
+          fontSize: 22,
+          color: _primaryColor,
         ),
       ),
     );

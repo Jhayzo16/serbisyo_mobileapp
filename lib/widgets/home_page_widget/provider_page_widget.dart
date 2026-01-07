@@ -7,7 +7,9 @@ import 'package:serbisyo_mobileapp/widgets/home_page_widget/provider_page_card.d
 import 'package:serbisyo_mobileapp/widgets/home_page_widget/provider_logotext_widget.dart';
 
 class ProviderPageWidget extends StatelessWidget {
-  const ProviderPageWidget({super.key});
+  const ProviderPageWidget({super.key, required this.themeBlue});
+
+  final Color themeBlue;
 
   static const _mutedText = Color(0xff7C7979);
 
@@ -74,80 +76,97 @@ class ProviderPageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final db = FirebaseFirestore.instance;
+    final surfaceTint = Color.lerp(Colors.white, themeBlue, 0.06)!;
 
     return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 10),
-          const ProviderLogotextWidget(),
-          const SizedBox(height: 8),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: db
-                  .collection('requests')
-                  .where('status', isEqualTo: 'pending')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Center(
-                    child: Text(
-                      'Failed to load requests',
-                      style: TextStyle(color: _mutedText),
-                    ),
-                  );
-                }
-
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final docs = snapshot.data?.docs ?? const [];
-                if (docs.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No service requests yet',
-                      style: TextStyle(color: _mutedText),
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-                  itemCount: docs.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final doc = docs[index];
-                    final request = ProviderRequestModel.fromDoc(
-                      requestId: doc.id,
-                      data: doc.data(),
-                    );
-
-                    return Center(
-                      child: ProviderPageCard(
-                        request: request,
-                        onViewDetails: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => ViewMoreDetails(
-                                requestId: request.requestId,
-                                isProviderView: true,
-                              ),
-                            ),
-                          );
-                        },
-                        onAccept: () => _acceptRequest(
-                          context,
-                          requestId: request.requestId,
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: surfaceTint,
+            borderRadius: BorderRadius.circular(26),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 18,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 6),
+              const ProviderLogotextWidget(
+                padding: EdgeInsets.fromLTRB(20, 10, 16, 6),
+              ),
+              Expanded(
+                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: db
+                      .collection('requests')
+                      .where('status', isEqualTo: 'pending')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const Center(
+                        child: Text(
+                          'Failed to load requests',
+                          style: TextStyle(color: _mutedText),
                         ),
-                      ),
+                      );
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final docs = snapshot.data?.docs ?? const [];
+                    if (docs.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No service requests yet',
+                          style: TextStyle(color: _mutedText),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(20, 6, 20, 18),
+                      itemCount: docs.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final doc = docs[index];
+                        final request = ProviderRequestModel.fromDoc(
+                          requestId: doc.id,
+                          data: doc.data(),
+                        );
+
+                        return ProviderPageCard(
+                          request: request,
+                          onViewDetails: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ViewMoreDetails(
+                                  requestId: request.requestId,
+                                  isProviderView: true,
+                                ),
+                              ),
+                            );
+                          },
+                          onAccept: () => _acceptRequest(
+                            context,
+                            requestId: request.requestId,
+                          ),
+                        );
+                      },
                     );
                   },
-                );
-              },
-            ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
