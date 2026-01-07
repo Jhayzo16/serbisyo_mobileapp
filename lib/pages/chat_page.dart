@@ -6,6 +6,7 @@ import 'package:serbisyo_mobileapp/pages/profile_page.dart';
 import 'package:serbisyo_mobileapp/pages/provider_homepage.dart';
 import 'package:serbisyo_mobileapp/pages/your_request_page.dart';
 import 'package:serbisyo_mobileapp/widgets/chat_page_widget/messages_panel.dart';
+import 'package:serbisyo_mobileapp/widgets/notification_bell_badge.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({super.key, this.isProvider = false});
@@ -189,9 +190,9 @@ class ChatPage extends StatelessWidget {
       actions: [
         Container(
           margin: EdgeInsets.only(top: 50, right: 20),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+          child: NotificationBellBadge(
+            iconSize: 40,
+            iconColor: Colors.black,
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -199,11 +200,6 @@ class ChatPage extends StatelessWidget {
                 ),
               );
             },
-            icon: const Icon(
-              size: 40,
-              color: Colors.black,
-              Icons.notifications,
-            ),
           ),
         ),
       ],

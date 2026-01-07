@@ -74,13 +74,11 @@ class _LoginUserFieldState extends State<LoginUserField> {
 class LoginUserFields extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
-  final VoidCallback? onForgotPassword;
 
   const LoginUserFields({
     super.key,
     required this.emailController,
     required this.passwordController,
-    this.onForgotPassword,
   });
   @override
   State<LoginUserFields> createState() => _LoginUserFieldsState();
@@ -133,14 +131,6 @@ class _LoginUserFieldsState extends State<LoginUserFields> {
               Text(
                 'Remember Me',
                 style: TextStyle(fontSize: 13, color: Color(0xFF374151)),
-              ),
-              Spacer(),
-              GestureDetector(
-                onTap: widget.onForgotPassword,
-                child: Text(
-                  'Forgot Password?',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF25607A)),
-                ),
               ),
             ],
           ),

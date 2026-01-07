@@ -13,6 +13,7 @@ import 'package:serbisyo_mobileapp/pages/provider_homepage.dart';
 import 'package:serbisyo_mobileapp/pages/your_request_page.dart';
 import 'package:serbisyo_mobileapp/services/auth_service.dart';
 import 'package:serbisyo_mobileapp/services/profile_service.dart';
+import 'package:serbisyo_mobileapp/widgets/notification_bell_badge.dart';
 import 'package:serbisyo_mobileapp/widgets/profile_page_widget/profile_info_row.dart';
 import 'package:serbisyo_mobileapp/widgets/profile_page_widget/profile_section_title.dart';
 import 'package:serbisyo_mobileapp/widgets/profile_page_widget/profile_text_field.dart';
@@ -417,9 +418,9 @@ class _ProfilePageState extends State<ProfilePage> {
       actions: [
         Container(
           margin: const EdgeInsets.only(top: 50, right: 20),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+          child: NotificationBellBadge(
+            iconSize: 40,
+            iconColor: Colors.black,
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -428,11 +429,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               );
             },
-            icon: const Icon(
-              size: 40,
-              color: Colors.black,
-              Icons.notifications,
-            ),
           ),
         ),
       ],

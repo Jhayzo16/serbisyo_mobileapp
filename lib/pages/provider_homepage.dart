@@ -4,6 +4,7 @@ import 'package:serbisyo_mobileapp/pages/jobs_page.dart';
 import 'package:serbisyo_mobileapp/pages/notification_page.dart';
 import 'package:serbisyo_mobileapp/pages/profile_page.dart';
 import 'package:serbisyo_mobileapp/widgets/home_page_widget/provider_page_widget.dart';
+import 'package:serbisyo_mobileapp/widgets/notification_bell_badge.dart';
 
 class ProviderHomepage extends StatelessWidget {
   const ProviderHomepage({super.key});
@@ -108,9 +109,9 @@ class ProviderHomepage extends StatelessWidget {
       actions: [
         Container(
           margin: EdgeInsets.only(top: 50, right: 20),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+          child: NotificationBellBadge(
+            iconSize: 40,
+            iconColor: Colors.black,
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -118,11 +119,6 @@ class ProviderHomepage extends StatelessWidget {
                 ),
               );
             },
-            icon: const Icon(
-              size: 40,
-              color: Colors.black,
-              Icons.notifications,
-            ),
           ),
         ),
       ],

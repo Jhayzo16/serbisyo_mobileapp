@@ -5,6 +5,7 @@ import 'package:serbisyo_mobileapp/pages/profile_page.dart';
 import 'package:serbisyo_mobileapp/pages/provider_homepage.dart';
 import 'package:serbisyo_mobileapp/widgets/job_page_widget/job_page_widget.dart';
 import 'package:serbisyo_mobileapp/widgets/job_page_widget/job_tab_switcher.dart';
+import 'package:serbisyo_mobileapp/widgets/notification_bell_badge.dart';
 
 class JobsPage extends StatefulWidget {
   const JobsPage({super.key});
@@ -128,9 +129,9 @@ class _JobsPageState extends State<JobsPage> {
       actions: [
         Container(
           margin: EdgeInsets.only(right: 20),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+          child: NotificationBellBadge(
+            iconSize: 40,
+            iconColor: Colors.black,
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -138,11 +139,6 @@ class _JobsPageState extends State<JobsPage> {
                 ),
               );
             },
-            icon: const Icon(
-              size: 40,
-              color: Colors.black,
-              Icons.notifications,
-            ),
           ),
         ),
       ],

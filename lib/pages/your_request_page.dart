@@ -9,6 +9,7 @@ import 'package:serbisyo_mobileapp/pages/view_more_details.dart';
 import 'package:serbisyo_mobileapp/models/your_request_model.dart';
 import 'package:serbisyo_mobileapp/widgets/your_request_page/tab_switcher_widget.dart';
 import 'package:serbisyo_mobileapp/widgets/your_request_page/your_request_card.dart';
+import 'package:serbisyo_mobileapp/widgets/notification_bell_badge.dart';
 
 class YourRequestPage extends StatefulWidget {
   const YourRequestPage({super.key});
@@ -800,9 +801,9 @@ class _YourRequestPageState extends State<YourRequestPage> {
       actions: [
         Container(
           margin: EdgeInsets.only(top: 50, right: 20),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+          child: NotificationBellBadge(
+            iconSize: 40,
+            iconColor: Colors.black,
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -810,11 +811,6 @@ class _YourRequestPageState extends State<YourRequestPage> {
                 ),
               );
             },
-            icon: const Icon(
-              size: 40,
-              color: Colors.black,
-              Icons.notifications,
-            ),
           ),
         ),
       ],

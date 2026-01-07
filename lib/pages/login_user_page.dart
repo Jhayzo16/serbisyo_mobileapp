@@ -158,7 +158,6 @@ class _LoginUserPageState extends State<LoginUserPage> {
               LoginUserFields(
                 emailController: _emailController,
                 passwordController: _passwordController,
-                onForgotPassword: _forgotPassword,
               ),
               const SizedBox(height: 18),
               LoginUserButton(

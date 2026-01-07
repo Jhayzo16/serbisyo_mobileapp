@@ -171,7 +171,7 @@ class NotificationPage extends StatelessWidget {
                       backgroundColor: Colors.transparent,
                       child: ClipOval(
                         child: Image.asset(
-                          'assets/icons/Pelican.png',
+                          'assets/icons/MascPeng.png',
                           width: 36,
                           height: 36,
                           fit: BoxFit.cover,
