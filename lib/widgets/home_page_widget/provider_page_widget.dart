@@ -211,7 +211,18 @@ class ProviderPageWidget extends StatelessWidget {
                       return const Center(child: CircularProgressIndicator());
                     }
 
-                    final docs = snapshot.data?.docs ?? const [];
+                    final docs = (snapshot.data?.docs ?? const []).toList()
+                      ..sort((a, b) {
+                        final aTs =
+                            (a.data()['createdAtClient'] as Timestamp?) ??
+                            (a.data()['createdAt'] as Timestamp?) ??
+                            Timestamp(0, 0);
+                        final bTs =
+                            (b.data()['createdAtClient'] as Timestamp?) ??
+                            (b.data()['createdAt'] as Timestamp?) ??
+                            Timestamp(0, 0);
+                        return bTs.compareTo(aTs);
+                      });
                     if (docs.isEmpty) {
                       return const Center(
                         child: Text(

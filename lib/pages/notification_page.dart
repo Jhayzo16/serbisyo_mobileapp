@@ -97,7 +97,9 @@ class NotificationPage extends StatelessWidget {
 
           final supportedDocs = docs.where((d) {
             final type = (d.data()['type'] ?? '').toString();
-            return type == 'message' || type == 'requestAccepted';
+            return type == 'message' ||
+                type == 'requestAccepted' ||
+                type == 'jobCompleted';
           }).toList();
 
           if (supportedDocs.isEmpty) {
@@ -123,11 +125,16 @@ class NotificationPage extends StatelessWidget {
                   ? 'Message'
                   : type == 'requestAccepted'
                   ? 'Request accepted'
+                  : type == 'jobCompleted'
+                  ? 'Job completed'
                   : (data['title'] ?? 'Serbisyo').toString();
               final body = type == 'message'
                   ? 'Someone sent you a message'
                   : type == 'requestAccepted'
                   ? (data['body'] ?? 'Your request has been accepted!')
+                        .toString()
+                  : type == 'jobCompleted'
+                  ? (data['body'] ?? 'Your request has been completed!')
                         .toString()
                   : (data['body'] ?? '').toString();
               final read = (data['read'] ?? false) == true;
@@ -157,6 +164,13 @@ class NotificationPage extends StatelessWidget {
                       (route) => route.isFirst,
                     );
                   } else if (type == 'requestAccepted') {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => const YourRequestPage(),
+                      ),
+                      (route) => route.isFirst,
+                    );
+                  } else if (type == 'jobCompleted') {
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
                         builder: (_) => const YourRequestPage(),

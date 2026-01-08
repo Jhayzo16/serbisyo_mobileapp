@@ -67,14 +67,50 @@ class ViewDetailsWidget extends StatelessWidget {
     if (me == null) return;
 
     try {
-      await FirebaseFirestore.instance
-          .collection('requests')
-          .doc(requestId)
-          .set({
-            'status': 'completed',
-            'completedAt': FieldValue.serverTimestamp(),
-            'completedBy': me,
-          }, SetOptions(merge: true));
+      final db = FirebaseFirestore.instance;
+      final reqRef = db.collection('requests').doc(requestId);
+      final notifRef = db.collection('notifications').doc();
+
+      await db.runTransaction((tx) async {
+        final snap = await tx.get(reqRef);
+        final data = snap.data() as Map<String, dynamic>?;
+        final userId = (data?['userId'] ?? '').toString().trim();
+
+        tx.set(reqRef, {
+          'status': 'completed',
+          'completedAt': FieldValue.serverTimestamp(),
+          'completedBy': me,
+        }, SetOptions(merge: true));
+
+        if (userId.isEmpty) return;
+
+        String serviceName = '';
+        final service = data?['service'];
+        if (service is Map) {
+          serviceName = (service['name'] ?? '').toString().trim();
+        }
+        if (serviceName.isEmpty) {
+          serviceName = (data?['title'] ?? data?['type'] ?? '')
+              .toString()
+              .trim();
+        }
+
+        final body = serviceName.isNotEmpty
+            ? 'Your request for $serviceName has been completed!'
+            : 'Your request has been completed!';
+
+        tx.set(notifRef, {
+          'recipientId': userId,
+          'senderId': me,
+          'type': 'jobCompleted',
+          'title': 'Serbisyo',
+          'body': body,
+          'requestId': requestId,
+          'read': false,
+          'createdAt': FieldValue.serverTimestamp(),
+          'createdAtClient': Timestamp.now(),
+        });
+      });
 
       if (!context.mounted) return;
       ScaffoldMessenger.of(

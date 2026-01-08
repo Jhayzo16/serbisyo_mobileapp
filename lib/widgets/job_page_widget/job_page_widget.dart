@@ -193,15 +193,30 @@ class JobPageWidget extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final jobs =
-            snapshot.data!.docs
-                .map(
-                  (doc) =>
-                      JobModel.fromDoc(requestId: doc.id, data: doc.data()),
-                )
-                .where((job) => _matchesFilter(job.status))
-                .toList()
-              ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
+        final docs = snapshot.data!.docs.toList();
+        docs.sort((a, b) {
+          Timestamp? pickTs(QueryDocumentSnapshot<Map<String, dynamic>> d) {
+            final data = d.data();
+            if (showCompleted) {
+              return (data['completedAt'] as Timestamp?) ??
+                  (data['acceptedAt'] as Timestamp?) ??
+                  (data['createdAtClient'] as Timestamp?) ??
+                  (data['createdAt'] as Timestamp?);
+            }
+            return (data['acceptedAt'] as Timestamp?) ??
+                (data['createdAtClient'] as Timestamp?) ??
+                (data['createdAt'] as Timestamp?);
+          }
+
+          final aTs = pickTs(a) ?? Timestamp(0, 0);
+          final bTs = pickTs(b) ?? Timestamp(0, 0);
+          return bTs.compareTo(aTs);
+        });
+
+        final jobs = docs
+            .map((doc) => JobModel.fromDoc(requestId: doc.id, data: doc.data()))
+            .where((job) => _matchesFilter(job.status))
+            .toList();
 
         if (jobs.isEmpty) {
           return Center(

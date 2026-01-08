@@ -238,8 +238,42 @@ class YourRequestsService {
         .where('userId', isEqualTo: userId)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs
+          Timestamp? sortTsFor(
+            RequestStatus status,
+            Map<String, dynamic> data,
+          ) {
+            switch (status) {
+              case RequestStatus.completed:
+                return (data['completedAt'] as Timestamp?) ??
+                    (data['acceptedAt'] as Timestamp?) ??
+                    (data['createdAtClient'] as Timestamp?) ??
+                    (data['createdAt'] as Timestamp?);
+              case RequestStatus.inProgress:
+                return (data['acceptedAt'] as Timestamp?) ??
+                    (data['createdAtClient'] as Timestamp?) ??
+                    (data['createdAt'] as Timestamp?);
+              case RequestStatus.pending:
+                return (data['createdAtClient'] as Timestamp?) ??
+                    (data['createdAt'] as Timestamp?);
+            }
+          }
+
+          final docs = snapshot.docs
               .where((d) => !isCancelledStatus(d.data()['status']))
+              .toList();
+
+          docs.sort((a, b) {
+            final aData = a.data();
+            final bData = b.data();
+            final aStatus = parseStatus(aData['status']);
+            final bStatus = parseStatus(bData['status']);
+
+            final aTs = sortTsFor(aStatus, aData) ?? Timestamp(0, 0);
+            final bTs = sortTsFor(bStatus, bData) ?? Timestamp(0, 0);
+            return bTs.compareTo(aTs);
+          });
+
+          return docs
               .map((d) => toRequestModel(requestId: d.id, data: d.data()))
               .toList(growable: false);
         });

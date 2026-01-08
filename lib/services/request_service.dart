@@ -105,6 +105,7 @@ class RequestService {
       'status': 'pending',
       'iconAssetPath': 'assets/icons/custom_icon.png',
       'createdAt': FieldValue.serverTimestamp(),
+      'createdAtClient': Timestamp.now(),
       ...request.toJson(),
       'imageUrls': imageUrls,
     });
@@ -137,6 +138,7 @@ class RequestService {
       'status': 'pending',
       'iconAssetPath': _iconAssetForServiceName(service.name),
       'createdAt': FieldValue.serverTimestamp(),
+      'createdAtClient': Timestamp.now(),
       'service': {
         'name': service.name,
         'description': service.description,
