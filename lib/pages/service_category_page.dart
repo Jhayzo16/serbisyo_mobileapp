@@ -6,11 +6,13 @@ import 'package:serbisyo_mobileapp/widgets/services_card_widget/service_item_car
 class ServiceCategoryPage extends StatefulWidget {
   final String title;
   final List<ServiceItemModel> services;
+  final int? initialSelectedIndex;
 
   const ServiceCategoryPage({
     super.key,
     required this.title,
     required this.services,
+    this.initialSelectedIndex,
   });
 
   @override
@@ -23,7 +25,18 @@ class _ServiceCategoryPageState extends State<ServiceCategoryPage> {
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.services.isNotEmpty ? 0 : -1;
+    if (widget.services.isEmpty) {
+      _selectedIndex = -1;
+      return;
+    }
+
+    final requested = widget.initialSelectedIndex;
+    if (requested == null) {
+      _selectedIndex = 0;
+      return;
+    }
+
+    _selectedIndex = requested.clamp(0, widget.services.length - 1);
   }
 
   @override

@@ -6,8 +6,9 @@ import 'package:serbisyo_mobileapp/pages/login_user_page.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } on FirebaseException catch (e) {
     if (e.code != 'duplicate-app') rethrow;
   }
@@ -21,9 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: "Poppins"
-      ),
+      theme: ThemeData(fontFamily: "Poppins"),
       home: LoginUserPage(),
     );
   }

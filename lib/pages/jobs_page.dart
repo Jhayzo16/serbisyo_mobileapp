@@ -129,6 +129,7 @@ class _JobsPageState extends State<JobsPage> {
 
   AppBar appBar(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: false,
       backgroundColor: bg,
       actions: [
         Container(

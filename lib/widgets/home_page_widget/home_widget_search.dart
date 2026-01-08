@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class HomeWidgetSearch extends StatelessWidget {
-  const HomeWidgetSearch({super.key});
+  const HomeWidgetSearch({super.key, this.controller, this.onChanged});
+
+  final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -9,19 +12,15 @@ class HomeWidgetSearch extends StatelessWidget {
       height: 52,
       margin: EdgeInsets.only(left: 20, right: 20, top: 20),
       child: TextField(
+        controller: controller,
+        onChanged: onChanged,
         decoration: InputDecoration(
           filled: true,
-          fillColor:  Color(0xFFF6F6F6),
-          prefixIcon:  Icon(
-            Icons.search,
-            color: Color(0xFFADACAD),
-          ),
+          fillColor: Color(0xFFF6F6F6),
+          prefixIcon: Icon(Icons.search, color: Color(0xFFADACAD)),
           hintText: 'Search services.....',
-          hintStyle: TextStyle(
-            color: Color(0xFFCACACA),
-            fontSize: 12,
-          ),
-          contentPadding:  EdgeInsets.symmetric(vertical: 14),
+          hintStyle: TextStyle(color: Color(0xFFCACACA), fontSize: 12),
+          contentPadding: EdgeInsets.symmetric(vertical: 14),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,

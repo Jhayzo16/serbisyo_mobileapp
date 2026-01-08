@@ -8,11 +8,13 @@ class ServiceItemCard extends StatelessWidget {
     required this.service,
     this.selected = false,
     this.onTap,
+    this.compact = false,
   });
 
   final ServiceItemModel service;
   final bool selected;
   final VoidCallback? onTap;
+  final bool compact;
 
   String _formatPeso(int amount) {
     final formatted = amount.toString().replaceAllMapped(
@@ -49,6 +51,15 @@ class ServiceItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor = selected ? const Color(0xff356785) : Colors.black;
+    final horizontalMargin = compact ? 20.0 : 40.0;
+    final horizontalPadding = compact ? 16.0 : 18.0;
+    final verticalPadding = compact ? 12.0 : 18.0;
+    final minHeight = compact ? 112.0 : 140.0;
+    final titleSize = compact ? 14.0 : 16.0;
+    final descSize = compact ? 11.0 : 12.0;
+    final iconSize = compact ? 32.0 : 38.0;
+    final iconBoxHeight = compact ? 32.0 : 38.0;
+    final iconBoxWidth = compact ? 36.0 : 45.0;
 
     return GestureDetector(
       onTap: onTap,
@@ -56,10 +67,13 @@ class ServiceItemCard extends StatelessWidget {
         elevation: 6,
         borderRadius: 14,
         borderSide: BorderSide(color: borderColor, width: selected ? 1.2 : 1.0),
-        margin: const EdgeInsets.symmetric(horizontal: 40),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        margin: EdgeInsets.symmetric(horizontal: horizontalMargin),
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
+        ),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 140),
+          constraints: BoxConstraints(minHeight: minHeight),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -69,11 +83,15 @@ class ServiceItemCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 45,
-                    height: 38,
+                    width: iconBoxWidth,
+                    height: iconBoxHeight,
                     child: FittedBox(
                       fit: BoxFit.contain,
-                      child: Icon(service.icon, size: 38, color: Colors.grey),
+                      child: Icon(
+                        service.icon,
+                        size: iconSize,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -85,8 +103,8 @@ class ServiceItemCard extends StatelessWidget {
                           service.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: titleSize,
                             fontWeight: FontWeight.bold,
                             color: Color(0xff254356),
                           ),
@@ -96,8 +114,8 @@ class ServiceItemCard extends StatelessWidget {
                           service.description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
+                          style: TextStyle(
+                            fontSize: descSize,
                             color: Color(0xff9B9B9B),
                             fontWeight: FontWeight.bold,
                           ),
@@ -114,7 +132,7 @@ class ServiceItemCard extends StatelessWidget {
                     child: Text.rich(
                       TextSpan(
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 10,
                           color: Color(0xff9B9B9B),
                         ),
                         children: [
@@ -125,7 +143,7 @@ class ServiceItemCard extends StatelessWidget {
                           TextSpan(
                             text: _formatPeso(service.price),
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),

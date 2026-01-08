@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:serbisyo_mobileapp/pages/provider_public_profile_page.dart';
 import 'package:serbisyo_mobileapp/widgets/app_elevated_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -416,38 +417,56 @@ class ViewDetailsWidget extends StatelessWidget {
         final phone = (data['phone'] ?? '').toString().trim();
         final location = (data['location'] ?? '').toString().trim();
         final photoUrl = (data['photoUrl'] ?? '').toString().trim();
+        final safeProviderId = providerId.trim();
 
         return _card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _sectionTitle('Provider'),
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 26,
-                    backgroundImage: const AssetImage(
-                      'assets/icons/profile_icon.png',
-                    ),
-                    foregroundImage: photoUrl.isNotEmpty
-                        ? NetworkImage(photoUrl)
-                        : null,
-                    backgroundColor: Colors.grey.shade200,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      name.isNotEmpty ? name : 'Provider',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: _primaryColor,
+              InkWell(
+                onTap: safeProviderId.isEmpty
+                    ? null
+                    : () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ProviderPublicProfilePage(
+                              providerId: safeProviderId,
+                            ),
+                          ),
+                        );
+                      },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 26,
+                        backgroundImage: const AssetImage(
+                          'assets/icons/profile_icon.png',
+                        ),
+                        foregroundImage: photoUrl.isNotEmpty
+                            ? NetworkImage(photoUrl)
+                            : null,
+                        backgroundColor: Colors.grey.shade200,
                       ),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          name.isNotEmpty ? name : 'Provider',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: _primaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
               const SizedBox(height: 12),
               if (phone.isNotEmpty)
@@ -569,35 +588,44 @@ class ViewDetailsWidget extends StatelessWidget {
               itemBuilder: (context, index) {
                 final url = urls[index].trim();
                 if (url.isEmpty) return const SizedBox.shrink();
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Image.network(
-                      url,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
-                        return Container(
-                          color: Colors.grey.shade200,
-                          alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.broken_image_outlined,
-                            color: _mutedText,
-                          ),
-                        );
-                      },
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return Container(
-                          color: Colors.grey.shade200,
-                          alignment: Alignment.center,
-                          child: const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        );
-                      },
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => _FullScreenImagePage(imageUrl: url),
+                      ),
+                    );
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Image.network(
+                        url,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) {
+                          return Container(
+                            color: Colors.grey.shade200,
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.broken_image_outlined,
+                              color: _mutedText,
+                            ),
+                          );
+                        },
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return Container(
+                            color: Colors.grey.shade200,
+                            alignment: Alignment.center,
+                            child: const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 );
@@ -707,6 +735,56 @@ class ViewDetailsWidget extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _FullScreenImagePage extends StatelessWidget {
+  const _FullScreenImagePage({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = imageUrl.trim();
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
+      body: Center(
+        child: url.isEmpty
+            ? const Icon(Icons.broken_image_outlined, color: Colors.white70)
+            : InteractiveViewer(
+                minScale: 1,
+                maxScale: 4,
+                child: Image.network(
+                  url,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) {
+                    return const Icon(
+                      Icons.broken_image_outlined,
+                      color: Colors.white70,
+                    );
+                  },
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    );
+                  },
+                ),
+              ),
+      ),
     );
   }
 }

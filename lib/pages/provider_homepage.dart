@@ -108,6 +108,7 @@ class ProviderHomepage extends StatelessWidget {
 
   AppBar appBar(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: false,
       elevation: 0,
       scrolledUnderElevation: 0,
       backgroundColor: Colors.transparent,
@@ -128,6 +129,7 @@ class ProviderHomepage extends StatelessWidget {
           ),
         ),
       ],
+
       toolbarHeight: 72,
       titleSpacing: 20,
       title: const Text(

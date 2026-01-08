@@ -27,12 +27,6 @@ class ProviderLogotextWidget extends StatelessWidget {
               ),
             ),
           ),
-          Image.asset(
-            'assets/icons/MascPeng.png',
-            width: 96,
-            height: 96,
-            fit: BoxFit.contain,
-          ),
         ],
       ),
     );

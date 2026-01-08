@@ -12,6 +12,96 @@ class ProviderPageWidget extends StatelessWidget {
   final Color themeBlue;
 
   static const _mutedText = Color(0xff7C7979);
+  static const _promptBlue = Color(0xff2B88C1);
+
+  Future<bool> _confirmAcceptRequest(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 18),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/icons/Penguin_promot_icon.png',
+                width: 90,
+                height: 90,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'Accept this Job?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _mutedText,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                      child: const Text(
+                        'No',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xff254356),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SizedBox(
+                      height: 40,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _promptBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Yes',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    return result ?? false;
+  }
+
+  Future<void> _acceptRequestWithConfirm(
+    BuildContext context, {
+    required String requestId,
+  }) async {
+    final ok = await _confirmAcceptRequest(context);
+    if (!ok) return;
+    if (!context.mounted) return;
+    await _acceptRequest(context, requestId: requestId);
+  }
 
   Future<void> _acceptRequest(
     BuildContext context, {
@@ -81,7 +171,7 @@ class ProviderPageWidget extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        padding: const EdgeInsets.fromLTRB(16, 70, 16, 0),
         child: Container(
           decoration: BoxDecoration(
             color: surfaceTint,
@@ -154,7 +244,7 @@ class ProviderPageWidget extends StatelessWidget {
                               ),
                             );
                           },
-                          onAccept: () => _acceptRequest(
+                          onAccept: () => _acceptRequestWithConfirm(
                             context,
                             requestId: request.requestId,
                           ),

@@ -1,19 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/pages/notification_page.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:serbisyo_mobileapp/models/profile_model.dart';
-import 'package:serbisyo_mobileapp/pages/chat_page.dart';
-import 'package:serbisyo_mobileapp/pages/home_page.dart';
-import 'package:serbisyo_mobileapp/pages/jobs_page.dart';
 import 'package:serbisyo_mobileapp/pages/login_user_page.dart';
-import 'package:serbisyo_mobileapp/pages/provider_homepage.dart';
-import 'package:serbisyo_mobileapp/pages/your_request_page.dart';
+import 'package:serbisyo_mobileapp/pages/provider_job_profile_page.dart';
 import 'package:serbisyo_mobileapp/services/auth_service.dart';
+import 'package:serbisyo_mobileapp/pages/profile_actions.dart';
 import 'package:serbisyo_mobileapp/services/profile_service.dart';
 import 'package:serbisyo_mobileapp/widgets/notification_bell_badge.dart';
+import 'package:serbisyo_mobileapp/widgets/profile_page_widget/profile_bottom_nav_bar.dart';
 import 'package:serbisyo_mobileapp/widgets/profile_page_widget/profile_info_row.dart';
 import 'package:serbisyo_mobileapp/widgets/profile_page_widget/profile_section_title.dart';
 import 'package:serbisyo_mobileapp/widgets/profile_page_widget/profile_text_field.dart';
@@ -29,14 +23,15 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   static const _primaryColor = Color(0xff254356);
-  static const _selectedColor = Color(0xff356785);
-  static const _unselectedColor = Color(0xffBFBFBF);
   static const _fieldFill = Color(0xFFF3F4F6);
   static const _muted = Color(0xff7C7979);
 
   final _auth = AuthService();
   final _profileService = ProfileService();
-  final _picker = ImagePicker();
+  late final _actions = ProfileActions(
+    auth: _auth,
+    profileService: _profileService,
+  );
 
   final _firstName = TextEditingController();
   final _lastName = TextEditingController();
@@ -67,9 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _load() async {
     try {
-      final profile = await _profileService.loadCurrent(
-        isProvider: widget.isProvider,
-      );
+      final profile = await _actions.loadCurrent(isProvider: widget.isProvider);
       _profile = profile;
       _firstName.text = profile?.firstName ?? '';
       _lastName.text = profile?.lastName ?? '';
@@ -84,7 +77,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _save() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _auth.currentUser;
     if (user == null) return;
 
     final first = _firstName.text.trim();
@@ -97,26 +90,15 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     try {
-      final current = _profile;
-      final next =
-          (current ??
-                  ProfileModel(
-                    uid: user.uid,
-                    role: widget.isProvider ? 'provider' : 'user',
-                    email: user.email ?? '',
-                    firstName: '',
-                    lastName: '',
-                    phone: '',
-                  ))
-              .copyWith(
-                firstName: first,
-                lastName: last,
-                phone: _phone.text.trim(),
-                jobTitle: _jobTitle.text.trim(),
-                location: _location.text.trim(),
-              );
-
-      await _profileService.save(isProvider: widget.isProvider, profile: next);
+      final next = await _actions.saveProfile(
+        isProvider: widget.isProvider,
+        currentProfile: _profile,
+        firstName: first,
+        lastName: last,
+        phone: _phone.text.trim(),
+        jobTitle: _jobTitle.text.trim(),
+        location: _location.text.trim(),
+      );
       _profile = next;
 
       if (!mounted) return;
@@ -134,7 +116,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _logout() async {
     try {
-      await _auth.signOut();
+      await _actions.logout();
     } finally {
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
@@ -145,17 +127,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _pickAndSavePhoto() async {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _auth.currentUser;
     if (user == null) return;
 
     try {
-      final picked = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-        maxWidth: 900,
-      );
-      if (picked == null) return;
-
       final current =
           _profile ??
           ProfileModel(
@@ -170,13 +145,15 @@ class _ProfilePageState extends State<ProfilePage> {
           );
 
       setState(() => _uploadingPhoto = true);
-      final next = await _profileService.saveProfilePhoto(
+      final next = await _actions.pickAndSavePhoto(
         isProvider: widget.isProvider,
-        profile: current,
-        file: picked,
+        currentDraft: current,
       );
-
-      _profile = next;
+      if (next != null) {
+        _profile = next;
+      } else {
+        return;
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -235,171 +212,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _sectionTitle(String title) {
-    return ProfileSectionTitle(title: title);
-  }
-
-  Widget _field({
-    required String label,
-    required TextEditingController controller,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return ProfileTextField(
-      label: label,
-      controller: controller,
-      enabled: _isEditing,
-      keyboardType: keyboardType,
-    );
-  }
-
-  Widget _infoRow(String label, String value) {
-    return ProfileInfoRow(label: label, value: value);
-  }
-
-  Container _navToolbar(BuildContext context) {
-    if (widget.isProvider) {
-      return Container(
-        height: 86,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 12,
-              offset: Offset(0, -6),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const ProviderHomepage()),
-                );
-              },
-              child: ImageIcon(
-                const AssetImage('assets/icons/provider_home_icon.png'),
-                color: _unselectedColor,
-                size: 26,
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const JobsPage()),
-                );
-              },
-              child: ImageIcon(
-                const AssetImage('assets/icons/your_jobs_icon.png'),
-                color: _unselectedColor,
-                size: 26,
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (_) => const ChatPage(isProvider: true),
-                  ),
-                );
-              },
-              child: ImageIcon(
-                const AssetImage('assets/icons/message_icon.png'),
-                color: _unselectedColor,
-                size: 26,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                color: _selectedColor,
-                shape: BoxShape.circle,
-              ),
-              child: ImageIcon(
-                const AssetImage('assets/icons/profile_icon.png'),
-                color: Colors.white,
-                size: 26,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      height: 86,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 12,
-            offset: Offset(0, -6),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const HomePage()),
-              );
-            },
-            child: ImageIcon(
-              const AssetImage('assets/icons/home_icon.png'),
-              color: _unselectedColor,
-              size: 26,
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const YourRequestPage()),
-              );
-            },
-            child: ImageIcon(
-              const AssetImage('assets/icons/request_icon.png'),
-              color: _unselectedColor,
-              size: 26,
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const ChatPage()),
-              );
-            },
-            child: ImageIcon(
-              const AssetImage('assets/icons/message_icon.png'),
-              color: _unselectedColor,
-              size: 26,
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-              color: _selectedColor,
-              shape: BoxShape.circle,
-            ),
-            child: ImageIcon(
-              const AssetImage('assets/icons/profile_icon.png'),
-              color: Colors.white,
-              size: 26,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   AppBar _appBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
@@ -437,12 +249,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final current = FirebaseAuth.instance.currentUser;
+    final current = _auth.currentUser;
     final profile = _profile;
 
     return Scaffold(
       appBar: _appBar(context),
-      bottomNavigationBar: _navToolbar(context),
+      bottomNavigationBar: ProfileBottomNavBar(isProvider: widget.isProvider),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : current == null
@@ -463,7 +275,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _sectionTitle('Profile Details'),
+                        const ProfileSectionTitle(title: 'Profile Details'),
                         TextButton(
                           onPressed: () {
                             if (_isEditing) {
@@ -483,30 +295,76 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    _field(label: 'First Name', controller: _firstName),
+                    ProfileTextField(
+                      label: 'First Name',
+                      controller: _firstName,
+                      enabled: _isEditing,
+                    ),
                     const SizedBox(height: 12),
-                    _field(label: 'Last Name', controller: _lastName),
+                    ProfileTextField(
+                      label: 'Last Name',
+                      controller: _lastName,
+                      enabled: _isEditing,
+                    ),
                     const SizedBox(height: 12),
-                    _field(
+                    ProfileTextField(
                       label: 'Phone',
                       controller: _phone,
+                      enabled: _isEditing,
                       keyboardType: TextInputType.phone,
                     ),
                     if (widget.isProvider) ...[
                       const SizedBox(height: 12),
-                      _field(label: 'Job Title', controller: _jobTitle),
+                      ProfileTextField(
+                        label: 'Job Title',
+                        controller: _jobTitle,
+                        enabled: _isEditing,
+                      ),
                       const SizedBox(height: 12),
-                      _field(label: 'Location', controller: _location),
+                      ProfileTextField(
+                        label: 'Location',
+                        controller: _location,
+                        enabled: _isEditing,
+                      ),
                     ],
                     const SizedBox(height: 18),
-                    _sectionTitle('Account Details'),
+                    const ProfileSectionTitle(title: 'Account Details'),
                     const SizedBox(height: 10),
-                    _infoRow('Email', profile?.email ?? ''),
+                    ProfileInfoRow(label: 'Email', value: profile?.email ?? ''),
                     const SizedBox(height: 10),
-                    _infoRow('Role', profile?.role ?? ''),
+                    ProfileInfoRow(label: 'Role', value: profile?.role ?? ''),
                     const SizedBox(height: 22),
-                    _sectionTitle('Actions'),
+                    const ProfileSectionTitle(title: 'Actions'),
                     const SizedBox(height: 12),
+                    if (widget.isProvider) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        height: 46,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const ProviderJobProfilePage(),
+                              ),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: _primaryColor),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Job Profile',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: _primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     SizedBox(
                       width: double.infinity,
                       height: 46,

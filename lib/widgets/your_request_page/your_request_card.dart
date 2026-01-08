@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serbisyo_mobileapp/models/your_request_model.dart';
+import 'package:serbisyo_mobileapp/pages/provider_public_profile_page.dart';
 import 'package:serbisyo_mobileapp/widgets/app_elevated_card.dart';
 
 class YourRequestCard extends StatelessWidget {
@@ -72,6 +73,7 @@ class YourRequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasProvider = request.provider != null;
+    final providerId = request.providerId?.trim() ?? '';
     final isPending = request.status == RequestStatus.pending;
     final isInProgress = request.status == RequestStatus.inProgress;
     final isCompleted = request.status == RequestStatus.completed;
@@ -146,59 +148,73 @@ class YourRequestCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Builder(
-                      builder: (context) {
-                        final pathOrUrl = request.provider!.avatarAssetPath;
-                        final ImageProvider avatar = pathOrUrl.startsWith('http')
-                            ? NetworkImage(pathOrUrl)
-                            : AssetImage(pathOrUrl);
-                        return CircleAvatar(
-                          radius: 20,
-                          backgroundImage: avatar,
-                          backgroundColor: Colors.transparent,
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            request.provider!.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: _titleColor,
+                InkWell(
+                  onTap: providerId.isEmpty
+                      ? null
+                      : () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => ProviderPublicProfilePage(
+                                providerId: providerId,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                size: 14,
-                                color: Color(0xffF2C94C),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${request.provider!.rating.toStringAsFixed(1)} (${request.provider!.reviewCount} Reviews)',
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  color: _mutedText,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                          );
+                        },
+                  child: Row(
+                    children: [
+                      Builder(
+                        builder: (context) {
+                          final pathOrUrl = request.provider!.avatarAssetPath;
+                          final ImageProvider avatar =
+                              pathOrUrl.startsWith('http')
+                              ? NetworkImage(pathOrUrl)
+                              : AssetImage(pathOrUrl);
+                          return CircleAvatar(
+                            radius: 20,
+                            backgroundImage: avatar,
+                            backgroundColor: Colors.transparent,
+                          );
+                        },
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              request.provider!.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: _titleColor,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  size: 14,
+                                  color: Color(0xffF2C94C),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${request.provider!.rating.toStringAsFixed(1)} (${request.provider!.reviewCount} Reviews)',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    color: _mutedText,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
               if (isCompleted && request.duration != null) ...[
