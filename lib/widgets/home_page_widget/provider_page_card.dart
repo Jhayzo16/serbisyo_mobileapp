@@ -155,7 +155,7 @@ class ProviderPageCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 10,
                       fontWeight: FontWeight.w700,
                       color: _primaryColor,
                     ),
@@ -179,7 +179,7 @@ class ProviderPageCard extends StatelessWidget {
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 10,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                     ),

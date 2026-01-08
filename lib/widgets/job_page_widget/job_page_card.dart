@@ -518,7 +518,7 @@ class JobPageCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 8,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
