@@ -50,7 +50,8 @@ class ServiceItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = selected ? const Color(0xff356785) : Colors.black;
+    const accentColor = Color(0xff356785);
+    final borderColor = selected ? accentColor : Colors.black;
     final horizontalMargin = compact ? 20.0 : 40.0;
     final horizontalPadding = compact ? 16.0 : 18.0;
     final verticalPadding = compact ? 12.0 : 18.0;
@@ -66,7 +67,7 @@ class ServiceItemCard extends StatelessWidget {
       child: AppElevatedCard(
         elevation: 6,
         borderRadius: 14,
-        borderSide: BorderSide(color: borderColor, width: selected ? 1.2 : 1.0),
+        borderSide: BorderSide(color: borderColor, width: selected ? 2.6 : 1.0),
         margin: EdgeInsets.symmetric(horizontal: horizontalMargin),
         padding: EdgeInsets.symmetric(
           horizontal: horizontalPadding,
