@@ -150,16 +150,18 @@ class NotificationPage extends StatelessWidget {
                   if (!context.mounted) return;
 
                   if (type == 'message') {
-                    Navigator.of(context).pushReplacement(
+                    Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
                         builder: (_) => ChatPage(isProvider: isProvider),
                       ),
+                      (route) => route.isFirst,
                     );
                   } else if (type == 'requestAccepted') {
-                    Navigator.of(context).pushReplacement(
+                    Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
                         builder: (_) => const YourRequestPage(),
                       ),
+                      (route) => route.isFirst,
                     );
                   }
                 },

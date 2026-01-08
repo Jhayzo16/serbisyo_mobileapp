@@ -130,9 +130,9 @@ class _HomePageState extends State<HomePage> {
             // Tasks
             GestureDetector(
               onTap: () {
-                Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => YourRequestPage()));
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const YourRequestPage()),
+                );
               },
               child: ImageIcon(
                 const AssetImage('assets/icons/request_icon.png'),
@@ -144,9 +144,9 @@ class _HomePageState extends State<HomePage> {
             // Chat
             GestureDetector(
               onTap: () {
-                Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const ChatPage()),
+                );
               },
               child: ImageIcon(
                 const AssetImage('assets/icons/message_icon.png'),
@@ -184,7 +184,6 @@ class _HomePageState extends State<HomePage> {
             iconSize: 40,
             iconColor: Colors.black,
             onPressed: () {
-             
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => const NotificationPage(isProvider: false),

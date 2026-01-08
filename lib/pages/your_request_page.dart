@@ -261,13 +261,9 @@ class _YourRequestPageState extends State<YourRequestPage> {
           // Home
           GestureDetector(
             onTap: () {
-              if (Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
-                return;
-              }
-
-              Navigator.of(context).pushReplacement(
+              Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => const HomePage()),
+                (route) => false,
               );
             },
             child: ImageIcon(
@@ -294,9 +290,9 @@ class _YourRequestPageState extends State<YourRequestPage> {
           // Chat
           GestureDetector(
             onTap: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const ChatPage()));
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const ChatPage()),
+              );
             },
             child: ImageIcon(
               const AssetImage('assets/icons/message_icon.png'),
